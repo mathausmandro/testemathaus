@@ -6,6 +6,12 @@
 -- produção (supabase db push não aplica seed). O login real do sistema é Microsoft.
 
 -- ---------------------------------------------------------------------------
+-- Tarefa 013: modo local do hook de domínio (aceita o domínio reservado exemplo.test em cadastros
+-- novos). O domínio real NÃO entra aqui: use npm run auth:domain com ALLOWED_EMAIL_DOMAIN.
+-- ---------------------------------------------------------------------------
+update app_private.auth_settings set local_test_mode = true;
+
+-- ---------------------------------------------------------------------------
 -- Tarefa 005: um usuário por perfil e um sem perfil; dois ensaios
 -- ---------------------------------------------------------------------------
 insert into auth.users (

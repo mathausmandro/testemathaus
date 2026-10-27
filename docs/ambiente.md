@@ -87,3 +87,13 @@ Não executado: `supabase start`, `db reset` e `status` requerem Docker/Supabase
 - `src/lib/env.ts` (variáveis públicas, zod, seguro para cliente) e `src/lib/env.server.ts` (inclui `SUPABASE_SECRET_KEY`, protegido por `import "server-only"`). `getPublicEnv()` e `getServerEnv()` falham com `EnvError` em português se faltar variável ou estiver vazia. Ainda não são chamadas na inicialização do app (nenhum consumidor até as tarefas 011 e 012); quando o primeiro consumidor existir, a falha ocorre no primeiro uso.
 - Portas ocupadas: ajuste em `supabase/config.toml` e use `host.docker.internal` conforme a seção do Docker.
 - Tempo de `supabase start`: pendente (registrar aqui na validação).
+
+## Login e domínio de e-mail (tarefas 012 e 013)
+
+Não executado: requer Docker/Supabase local. Detalhes do login em `docs/auth-microsoft.md`.
+
+- Hook `before_user_created` habilitado em `supabase/config.toml` (função `public.hook_before_user_created`). Sem domínio configurado, **todo cadastro novo é recusado** (padrão seguro). Os usuários do seed entram direto em `auth.users` e não passam pelo hook.
+- O seed liga `local_test_mode`: cadastros novos com o domínio reservado `exemplo.test` são aceitos só no banco local.
+- Para gravar o domínio da empresa (pendente): defina `ALLOWED_EMAIL_DOMAIN` no `.env.local` (ou no ambiente apontando para teste/produção) e rode `npm run auth:domain`. O script chama `public.set_auth_email_domain` com a chave secreta (só service_role executa) e não imprime valores. Domínio vazio desliga os cadastros.
+- Alternativa sem o script (teste/produção, SQL Editor do painel): `select public.set_auth_email_domain('<domínio>');` (é dado de configuração, não mudança de esquema).
+- Regra: comparação sem diferença de maiúsculas e exata (subdomínio, sufixo, prefixo parecido e duplo @ são recusados). Claim `xms_edov` do Entra ID: valor falso recusa; ausência só recusa com `require_verified_email_claim = true` em `app_private.auth_settings` (ligar depois que a TI configurar a claim).

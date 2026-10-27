@@ -1179,8 +1179,10 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"]
       }
       has_trial_access: { Args: { p_trial_id: string }; Returns: boolean }
+      hook_before_user_created: { Args: { event: Json }; Returns: Json }
       is_coordination: { Args: never; Returns: boolean }
       is_trial_member: { Args: { p_trial_id: string }; Returns: boolean }
+      set_auth_email_domain: { Args: { p_domain: string }; Returns: string }
       storage_object_trial_id: { Args: { p_name: string }; Returns: string }
     }
     Enums: {

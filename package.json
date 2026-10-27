@@ -13,7 +13,8 @@
         "test:perf": "node tests/perf/run-lighthouse.mjs",
         "verify": "node scripts/verify.mjs",
         "test:security": "secretlint \"**/*\" && npm audit --audit-level=high && vitest run tests/security",
-        "gen:types": "supabase gen types typescript --local --schema public > src/lib/data/database.types.ts"
+        "gen:types": "supabase gen types typescript --local --schema public > src/lib/data/database.types.ts",
+        "auth:domain": "node scripts/set-allowed-email-domain.mjs"
     },
     "dependencies": {
         "@supabase/ssr": "^0.12.7",
