@@ -5,7 +5,7 @@ Cerca de 20 semanas, começando por um ensaio piloto.
 ## Status
 
 - [ ] Fase 0: Alinhamento
-- [ ] Fase 1: Base, login e ambientes (em andamento: 001 pronta em 27/10/2026, com Docker pendente pela TI; 003 e 004 escritas, prontas para validação com Docker/Supabase; 005, 006 e 007 escritas, prontas para validação com Docker/Supabase; 002 pronta em 27/10/2026, CI real pendente do repositório remoto)
+- [ ] Fase 1: Base, login e ambientes (em andamento: 001 pronta em 27/10/2026, com Docker pendente pela TI; 003 e 004 escritas, prontas para validação com Docker/Supabase; 005 a 008 escritas, prontas para validação com Docker/Supabase; 002 pronta em 27/10/2026, CI real pendente do repositório remoto)
 - [ ] Fase 2: Geração automática
 - [ ] Fase 3: Coleta de campo
 - [ ] Fase 4: Avisos e calendário

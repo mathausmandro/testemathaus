@@ -119,6 +119,21 @@ describe("migrations: regras de segurança", () => {
     expect(del).toEqual([]);
   });
 
+  it("toda tabela de campo tem gatilhos de histórico e de bloqueio de exclusão", () => {
+    const campo = ["field_records", "field_record_photos", "applications", "occurrences", "quality_flags"];
+    const triggers = stmts.filter((s) => s.CreateTrigStmt).map((s) => s.CreateTrigStmt);
+    const has = (table: string, trig: string, fn: string) =>
+      triggers.some(
+        (t) => t.relation.relname === table && t.trigname === trig && t.funcname.at(-1).String.sval === fn,
+      );
+    for (const t of campo) {
+      expect(has(t, "zz_capture_change", "capture_field_change"), `${t}: captura`).toBe(true);
+      expect(has(t, "zz_log_insert", "log_field_insert"), `${t}: inclusão`).toBe(true);
+      expect(has(t, "prevent_delete", "prevent_field_delete"), `${t}: DELETE`).toBe(true);
+      expect(has(t, "prevent_truncate", "prevent_field_delete"), `${t}: TRUNCATE`).toBe(true);
+    }
+  });
+
   it("colunas de data/hora usam timestamptz (timestamp sem fuso é proibido)", () => {
     expect(allMigrations).not.toMatch(/\btimestamp\b(?!tz)(?!\s+with\s+time\s+zone)/i);
   });

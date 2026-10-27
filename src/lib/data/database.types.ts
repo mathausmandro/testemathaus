@@ -22,6 +22,7 @@ export type Database = {
       applications: {
         Row: {
           applied_at: string
+          change_reason: string | null
           client_id: string
           created_at: string
           created_by: string
@@ -43,6 +44,7 @@ export type Database = {
         }
         Insert: {
           applied_at: string
+          change_reason?: string | null
           client_id: string
           created_at?: string
           created_by?: string
@@ -64,6 +66,7 @@ export type Database = {
         }
         Update: {
           applied_at?: string
+          change_reason?: string | null
           client_id?: string
           created_at?: string
           created_by?: string
@@ -154,6 +157,48 @@ export type Database = {
           },
         ]
       }
+      change_history: {
+        Row: {
+          actor_role: string | null
+          author_id: string | null
+          changed_at: string
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+          operation: string
+          reason: string | null
+          record_id: string
+          table_name: string
+          trial_id: string | null
+        }
+        Insert: {
+          actor_role?: string | null
+          author_id?: string | null
+          changed_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          operation: string
+          reason?: string | null
+          record_id: string
+          table_name: string
+          trial_id?: string | null
+        }
+        Update: {
+          actor_role?: string | null
+          author_id?: string | null
+          changed_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          operation?: string
+          reason?: string | null
+          record_id?: string
+          table_name?: string
+          trial_id?: string | null
+        }
+        Relationships: []
+      }
       factor_levels: {
         Row: {
           created_at: string
@@ -236,6 +281,7 @@ export type Database = {
       }
       field_record_photos: {
         Row: {
+          change_reason: string | null
           client_id: string
           created_at: string
           created_by: string
@@ -254,6 +300,7 @@ export type Database = {
           voided_reason: string | null
         }
         Insert: {
+          change_reason?: string | null
           client_id: string
           created_at?: string
           created_by?: string
@@ -272,6 +319,7 @@ export type Database = {
           voided_reason?: string | null
         }
         Update: {
+          change_reason?: string | null
           client_id?: string
           created_at?: string
           created_by?: string
@@ -322,6 +370,7 @@ export type Database = {
       }
       field_records: {
         Row: {
+          change_reason: string | null
           client_id: string
           created_at: string
           created_by: string
@@ -343,6 +392,7 @@ export type Database = {
           voided_reason: string | null
         }
         Insert: {
+          change_reason?: string | null
           client_id: string
           created_at?: string
           created_by?: string
@@ -364,6 +414,7 @@ export type Database = {
           voided_reason?: string | null
         }
         Update: {
+          change_reason?: string | null
           client_id?: string
           created_at?: string
           created_by?: string
@@ -424,6 +475,7 @@ export type Database = {
       }
       occurrences: {
         Row: {
+          change_reason: string | null
           client_id: string
           created_at: string
           created_by: string
@@ -439,6 +491,7 @@ export type Database = {
           voided_reason: string | null
         }
         Insert: {
+          change_reason?: string | null
           client_id: string
           created_at?: string
           created_by?: string
@@ -454,6 +507,7 @@ export type Database = {
           voided_reason?: string | null
         }
         Update: {
+          change_reason?: string | null
           client_id?: string
           created_at?: string
           created_by?: string
@@ -647,6 +701,7 @@ export type Database = {
       }
       quality_flags: {
         Row: {
+          change_reason: string | null
           comment: string | null
           created_at: string
           created_by: string
@@ -659,6 +714,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          change_reason?: string | null
           comment?: string | null
           created_at?: string
           created_by?: string
@@ -671,6 +727,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          change_reason?: string | null
           comment?: string | null
           created_at?: string
           created_by?: string
