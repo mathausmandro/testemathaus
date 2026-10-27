@@ -134,6 +134,39 @@ describe("migrations: regras de segurança", () => {
     }
   });
 
+  it("notification_log não tem política de escrita (só o serviço grava)", () => {
+    const policies = stmts.filter((s) => s.CreatePolicyStmt?.table.relname === "notification_log");
+    expect(policies.length).toBeGreaterThan(0);
+    for (const p of policies) expect(p.CreatePolicyStmt.cmd_name).toBe("select");
+  });
+
+  it("calendar_feed_tokens guarda só o hash do token e não tem política de DELETE", () => {
+    const create = stmts.find((s) => s.CreateStmt?.relation.relname === "calendar_feed_tokens")!.CreateStmt;
+    const cols = create.tableElts
+      .filter((e: Stmt) => e.ColumnDef)
+      .map((e: Stmt) => e.ColumnDef.colname as string);
+    expect(cols).toContain("token_hash");
+    expect(cols).toContain("revoked_at");
+    expect(cols.filter((c: string) => c.includes("token") && c !== "token_hash")).toEqual([]);
+    const del = stmts.filter(
+      (s) =>
+        s.CreatePolicyStmt?.table.relname === "calendar_feed_tokens" &&
+        ["delete", "all"].includes(s.CreatePolicyStmt.cmd_name),
+    );
+    expect(del).toEqual([]);
+    // Formato SHA-256 hex garantido por CHECK; leitura da coluna negada por privilégio de coluna.
+    expect(allMigrations).toMatch(/token_hash ~ '\^\[0-9a-f\]\{64\}\$'/);
+    expect(allMigrations).toMatch(/grant select \((?![^)]*token_hash)[^)]*\)\s+on public\.calendar_feed_tokens to authenticated/);
+  });
+
+  it("tabelas pessoais de avisos não têm política de leitura por perfil (só o dono)", () => {
+    for (const t of ["notification_preferences", "push_subscriptions"]) {
+      const sel = stmts.filter((s) => s.CreatePolicyStmt?.table.relname === t && s.CreatePolicyStmt.cmd_name === "select");
+      expect(sel.length, t).toBe(1);
+      expect(JSON.stringify(sel[0].CreatePolicyStmt.qual), t).not.toMatch(/is_coordination|has_trial_access/);
+    }
+  });
+
   it("colunas de data/hora usam timestamptz (timestamp sem fuso é proibido)", () => {
     expect(allMigrations).not.toMatch(/\btimestamp\b(?!tz)(?!\s+with\s+time\s+zone)/i);
   });
