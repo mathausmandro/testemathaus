@@ -16,7 +16,7 @@ Fluxo de cada tarefa: analista, desenvolvedor, qa, performance, seguranca. Statu
 | 009 | [Migration: avisos, push e tokens do feed iCal](009-migration-avisos-e-calendario.md) | 1 | pronta para validação (requer Docker/Supabase) | opus | 005 | - | - | - |
 | 010 | [Testes pgTAP: matriz de acesso por perfil](010-matriz-de-acesso-pgtap.md) | 1 | pronta para validação (requer Docker/Supabase) | opus | 005 a 009 | - | - | - |
 | 011 | [Camada de acesso a dados tipada](011-camada-de-dados.md) | 1 | pronta para validação (requer Docker/Supabase) | sonnet | 004, 005, 006 | - | - | - |
-| 012 | [Login Microsoft configurável e sessão](012-login-microsoft-configuravel.md) | 1 | a fazer | opus | 004, 005 | - | - | - |
+| 012 | [Login Microsoft configurável e sessão](012-login-microsoft-configuravel.md) | 1 | pronta para validação (requer Docker/Supabase e Entra ID) | opus | 004, 005 | - | - | - |
 | 013 | [Hook de domínio de e-mail](013-hook-de-dominio-de-email.md) | 1 | a fazer | opus | 004, 005 | - | - | - |
 | 014 | [proxy.ts e tela Aguardando liberação](014-proxy-e-aguardando-liberacao.md) | 1 | a fazer | opus | 011, 012 | - | - | - |
 | 015 | [Administração de perfis e atribuição de ensaios](015-administracao-de-perfis-e-atribuicao.md) | 1 | a fazer | opus | 005, 008, 011, 014 | - | - | - |

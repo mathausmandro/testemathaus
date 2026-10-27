@@ -161,7 +161,12 @@ site_url = "http://127.0.0.1:3000"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+# Tarefa 012: só o callback do app (sem curingas amplos). Porta 3100 = e2e (Playwright).
+additional_redirect_urls = [
+  "http://127.0.0.1:3000/auth/callback",
+  "http://localhost:3000/auth/callback",
+  "http://localhost:3100/auth/callback",
+]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -334,6 +339,22 @@ url = ""
 # If enabled, the nonce check will be skipped. Required for local sign in with Google auth.
 skip_nonce_check = false
 # If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
+email_optional = false
+
+# Tarefa 012: Microsoft (Entra ID), tenant único. NENHUM valor real aqui: tudo vem de variáveis de
+# ambiente lidas pela CLI do Supabase (shell ou supabase/.env, fora do git). Passo a passo: docs/auth-microsoft.md.
+# enabled fica false para o `supabase start` funcionar sem as variáveis; para ligar localmente, defina
+# SUPABASE_AUTH_EXTERNAL_AZURE_ENABLED=true (sobrescrita por variável da CLI) ou troque para true sem comitar.
+[auth.external.azure]
+enabled = false
+client_id = "env(SUPABASE_AUTH_EXTERNAL_AZURE_CLIENT_ID)"
+# DO NOT commit your OAuth provider secret to git.
+secret = "env(SUPABASE_AUTH_EXTERNAL_AZURE_SECRET)"
+# Endereço de retorno do Supabase Auth registrado no Entra ID (local: http://127.0.0.1:54321/auth/v1/callback).
+redirect_uri = "env(SUPABASE_AUTH_EXTERNAL_AZURE_REDIRECT_URI)"
+# URL do tenant único (https://login.microsoftonline.com/<id-do-tenant>/v2.0). Sem ela, qualquer tenant entraria.
+url = "env(SUPABASE_AUTH_EXTERNAL_AZURE_URL)"
+skip_nonce_check = false
 email_optional = false
 
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
