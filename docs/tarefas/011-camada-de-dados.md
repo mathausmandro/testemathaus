@@ -1,5 +1,7 @@
 # 011 - Camada de acesso a dados tipada (src/lib/data)
-Fase: 1 | Status: a fazer | Modelo do desenvolvedor: sonnet
+
+> Parte não executada: requer Docker/Supabase local (gen types real, teste com sessão de cada perfil).
+Fase: 1 | Status: pronta para validação (requer Docker/Supabase) | Modelo do desenvolvedor: sonnet
 
 ## Objetivo
 Criar a camada única e tipada em src/lib/data por onde todas as telas e Server Actions falam com o Supabase, com clientes de servidor e de navegador seguindo a skill nextjs-app-router, sem nenhuma chamada solta ao Supabase nas páginas.
@@ -36,3 +38,18 @@ Unitários: funções de dados com cliente simulado e com Supabase local; valida
 - Nenhuma.
 
 ## Entrega (preenchido pelo desenvolvedor)
+
+### Arquivos
+- src/lib/data: errors.ts (DataError, traduzirErro, mensagens pt-BR), types.ts, profiles.ts (getOwnProfile), trials.ts (listTrials, getTrial, createTrial + zod), index.ts.
+- src/lib/data/client/browser.ts (só chave publicável), src/lib/data/server/server-client.ts (por requisição, cookies), src/lib/data/server/admin.ts (única referência à chave secreta; ninguém o usa).
+- Repositórios recebem o cliente por parâmetro (testáveis sem banco). Env validado no primeiro uso de cada cliente (pendência da 004 resolvida); página inicial não usa cliente, então e2e e Lighthouse seguem passando.
+- eslint.config.mjs: no-restricted-imports de @supabase/* fora de src/lib/data (verificado com arquivo temporário, removido). package.json: @supabase/ssr, @supabase/supabase-js, script gen:types.
+- Testes: tests/unit/data.test.ts, data-clients.test.ts, data-boundary.test.ts (tipos × migrations, fronteira), tests/security/secret-key-isolation.test.ts (G3), tests/unit/env.test.ts ajustado (admin.ts pode citar a variável).
+
+### Como testar
+npm run lint, typecheck, npm test, npm run test:security, npm run verify (todos passaram; pgTAP ignorada).
+
+### Não executado (requer Docker/Supabase)
+- npm run gen:types e comparação com database.types.ts escrito à mão.
+- Teste com sessão real de cada perfil (listar apenas atribuídos; field/home_office recebem forbidden ao criar): cobertura unitária só com cliente simulado.
+- Varredura do bundle real por SUPABASE_SECRET_KEY segue para a 017.

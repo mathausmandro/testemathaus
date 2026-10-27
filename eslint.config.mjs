@@ -5,6 +5,17 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  // Supabase só dentro de src/lib/data (regra 3 do CLAUDE.md).
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/lib/data/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        { patterns: [{ group: ["@supabase/*"], message: "Use a camada de acesso a dados em src/lib/data." }] },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

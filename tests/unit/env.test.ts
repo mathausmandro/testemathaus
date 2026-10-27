@@ -64,9 +64,9 @@ describe("segredos fora do código de cliente", () => {
     }
   });
 
-  it("só env.server.ts lê SUPABASE_SECRET_KEY em src", () => {
+  it("só env.server.ts e o cliente admin (data/server) citam SUPABASE_SECRET_KEY em src", () => {
     const usam = src.filter((f) => readFileSync(f, "utf8").includes("SUPABASE_SECRET_KEY"));
-    expect(usam.map((f) => f.split(sep).join("/"))).toEqual(["src/lib/env.server.ts"]);
+    expect(usam.map((f) => f.split(sep).join("/"))).toEqual(["src/lib/data/server/admin.ts", "src/lib/env.server.ts"]);
   });
 
   it("env.ts (módulo de cliente) não menciona segredo", () => {
