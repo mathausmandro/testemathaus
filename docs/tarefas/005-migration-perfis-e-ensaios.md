@@ -1,5 +1,5 @@
 # 005 - Migration: perfis, ensaios, atribuição e RLS base
-Fase: 1 | Status: a fazer | Modelo do desenvolvedor: opus
+Fase: 1 | Status: pronta para validação (requer Docker/Supabase) | Modelo do desenvolvedor: opus
 
 ## Objetivo
 Criar o núcleo de acesso do banco: profiles, trials e trial_members, com as funções de papel e de pertencimento ao ensaio, RLS ligada e negada por padrão, e testes pgTAP. Todas as demais tabelas reutilizarão essas funções.
@@ -43,3 +43,34 @@ pgTAP: matriz completa (4 situações de usuário x leitura, inserção, atualiz
 - Cultura e contratante são texto livre ou listas controladas?
 
 ## Entrega (preenchido pelo desenvolvedor)
+
+Não executado: requer Docker/Supabase local (orientação de 27/10/2026). Migration, seed e pgTAP foram escritos e validados só estaticamente (parser real do Postgres 17 via libpg-query em WASM, no Vitest).
+
+### Arquivos alterados
+- Novos: `supabase/migrations/20261027170000_perfis_e_ensaios.sql`, `supabase/tests/005_perfis_e_ensaios.test.sql`, `src/lib/data/database.types.ts` (à mão, formato do gen types), `tests/unit/migrations.test.ts`.
+- Alterados: `supabase/seed.sql` (4 usuários fictícios em `exemplo.test`, 2 ensaios, membros), `package.json`/`package-lock.json` (devDependency `libpg-query@17`, WASM, sem binário nativo).
+
+### O que foi feito
+- Enums `app_role` (coordination, field, home_office) e `trial_design` (dbc, dic, factorial, split_plot). `profiles.role` nula = aguardando liberação.
+- `profiles`, `trials` (código único, contratante, cultura, local, delineamento, datas previstas, status, `randomization_seed`, responsável técnico) e `trial_members` (id uuid + único `(trial_id, user_id)`; índice `(user_id, trial_id)`).
+- Gatilho `on_auth_user_created` cria o perfil com role nula.
+- Funções security definer, `search_path = ''`, EXECUTE revogado de public/anon e concedido a authenticated/service_role: `current_app_role()` (current_role é reservado), `is_coordination()`, `is_trial_member(uuid)`, `has_trial_access(uuid)`, `can_record_field_data(uuid)`, `can_review_trial(uuid)` (as duas últimas já servem a 007).
+- RLS ligada nas 3 tabelas, só políticas `to authenticated`, nenhuma `using (true)`. anon sem privilégio algum. Em profiles: `insert`/`delete` revogados de authenticated e `update` só nas colunas `full_name` e `role`.
+- Auto-promoção bloqueada em duas camadas: política (só o próprio perfil ou coordination) + gatilho `protect_profile_columns` (só coordination muda role, nunca o próprio; id/e-mail imutáveis). Operações de sistema (postgres/service_role, sem auth.uid()) passam, para seed e administração.
+
+### Como testar
+- Aqui: `npm test` (tests/unit/migrations.test.ts: sintaxe de migrations, seed e pgTAP; RLS em toda tabela; sem `using (true)`; search_path em security definer; tipos x migrations).
+- Com Docker (pendente): `npx supabase db reset`, `npx supabase test db` (arquivo `005_perfis_e_ensaios.test.sql`: estrutura, matriz coordination/field/home_office/sem perfil/anon x leitura/inserção/atualização/exclusão nas 3 tabelas, auto-promoção, recursão), `npx supabase gen types typescript --local` e comparar.
+- Performance (pendente): `explain analyze select * from trials` como field; esperado uso de `trial_members_trial_user_key`/`trial_members_user_trial_idx` dentro de `has_trial_access`.
+
+### Desvios e observações
+- Status do ensaio é `text` com CHECK provisório (`draft`, `in_progress`, `completed`, `cancelled`, tirado do exemplo das dúvidas) em vez de enum: mudar a lista depois é um `alter table ... check`, sem a limitação de enum de não remover valor.
+- `planned_start_date`/`planned_end_date` são `date` (só dia). timestamptz trocaria o dia ao converter para America/Sao_Paulo.
+- Só `code` é obrigatório no ensaio; demais campos anuláveis até a resposta do Mathaus.
+- `technical_lead` é texto livre (o responsável técnico pode não ser usuário do sistema).
+- field e home_office veem só o próprio perfil (não os nomes dos colegas). Se as telas de conferência precisarem do nome do autor, abrir tarefa para expor nome por função/visão restrita.
+- Seed sem senha (login é Microsoft); colunas de token vazias permitem link mágico local pelo Mailpit.
+
+### Dúvidas para o Mathaus (acréscimo do desenvolvedor)
+- Confirmar a lista provisória de status e os campos obrigatórios (hoje só o código).
+- O responsável técnico é sempre um usuário do sistema (então vira referência a profiles) ou pode ser externo?

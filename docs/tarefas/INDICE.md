@@ -9,7 +9,7 @@ Fluxo de cada tarefa: analista, desenvolvedor, qa, performance, seguranca. Statu
 | 002 | [Pipeline de qualidade, segurança e performance](002-pipeline-de-qualidade.md) | 1 | pronta (CI real pendente) | sonnet | 001 | [aprovado](../qa/002.md) | [aprovado](../performance/002.md) | [aprovado](../seguranca/002.md) |
 | 003 | [Docker do app e docker compose](003-docker-do-app.md) | 1 | pronta para validação (requer Docker) | sonnet | 001 | - | - | - |
 | 004 | [Supabase local e variáveis de ambiente](004-supabase-local.md) | 1 | pronta para validação (requer Docker/Supabase) | sonnet | 001, 002 | - | - | - |
-| 005 | [Migration: perfis, ensaios, atribuição e RLS base](005-migration-perfis-e-ensaios.md) | 1 | a fazer | opus | 004 | - | - | - |
+| 005 | [Migration: perfis, ensaios, atribuição e RLS base](005-migration-perfis-e-ensaios.md) | 1 | pronta para validação (requer Docker/Supabase) | opus | 004 | - | - | - |
 | 006 | [Migration: estrutura do protocolo](006-migration-protocolo.md) | 1 | a fazer | opus | 005 | - | - | - |
 | 007 | [Migration: dados de campo](007-migration-dados-de-campo.md) | 1 | a fazer | opus | 005, 006 | - | - | - |
 | 008 | [Migration: histórico imutável](008-migration-historico-imutavel.md) | 1 | a fazer | opus | 007 | - | - | - |
