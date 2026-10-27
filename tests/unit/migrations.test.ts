@@ -172,6 +172,37 @@ describe("migrations: regras de segurança", () => {
   });
 });
 
+describe("matriz de acesso (tarefa 010)", () => {
+  const stmts = migFiles.flatMap((f) => stmtsOf(read(migDir, f)));
+  const tables = stmts
+    .filter((s) => s.CreateStmt?.relation.schemaname === "public")
+    .map((s) => s.CreateStmt.relation.relname as string);
+  const matrixTest = read(testDir, "010_matriz_de_acesso.test.sql");
+  const matrixDoc = readFileSync(join(root, "docs", "seguranca", "matriz-acesso.md"), "utf8");
+
+  it.each(tables)("tabela %s tem classe de regra e casos no pgTAP da matriz", (t) => {
+    expect(matrixTest).toMatch(new RegExp(`'${t}'`));
+  });
+
+  it.each(tables)("tabela %s aparece na matriz documentada", (t) => {
+    expect(matrixDoc).toMatch(new RegExp(`\\b${t}\\b`));
+  });
+
+  it("a suíte cobre os cinco tipos de usuário e não usa chave secreta nem service_role", () => {
+    for (const a of ["coordination", "field", "home_office", "no_role", "anon"]) {
+      expect(matrixTest).toContain(`check_matrix('${a}')`);
+    }
+    expect(matrixTest).not.toMatch(/service_role|SUPABASE_SECRET_KEY/);
+  });
+
+  it("a suíte tem as regras transversais (RLS, using true, search_path, cobertura)", () => {
+    expect(matrixTest).toContain("toda tabela do schema public tem RLS ligada");
+    expect(matrixTest).toContain("nenhuma política do schema public usa using (true)");
+    expect(matrixTest).toContain("toda função security definer do schema public tem search_path fixo");
+    expect(matrixTest).toContain("toda tabela do schema public está na matriz");
+  });
+});
+
 describe("database.types.ts coerente com as migrations", () => {
   const typesSrc = readFileSync(join(root, "src", "lib", "data", "database.types.ts"), "utf8");
   const stmts = migFiles.flatMap((f) => stmtsOf(read(migDir, f)));
