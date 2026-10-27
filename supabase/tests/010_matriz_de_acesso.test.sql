@@ -26,7 +26,7 @@ create schema test_helpers;
 -- 5 field (A e B; dono das linhas "de outra pessoa").
 create function test_helpers.uid(p_n integer) returns uuid
 language sql immutable
-as $$ select ('10000000-0000-4000-8000-' || lpad(p_n::text, 12, '0'))::uuid $$;
+as $$ select ('a1000000-0000-4000-8000-' || lpad(p_n::text, 12, '0'))::uuid $$;
 
 -- Ensaios: 1 = A (atribuído), 2 = B (não atribuído aos usuários 2, 3 e 4), 3 = vazio (sem dado de campo).
 create function test_helpers.trial(p_t integer) returns uuid
