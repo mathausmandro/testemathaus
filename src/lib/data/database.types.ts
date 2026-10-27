@@ -19,6 +19,94 @@ export type Database = {
   }
   public: {
     Tables: {
+      applications: {
+        Row: {
+          applied_at: string
+          client_id: string
+          created_at: string
+          created_by: string
+          equipment: string | null
+          id: string
+          notes: string | null
+          operator_name: string | null
+          relative_humidity_pct: number | null
+          spray_volume: number | null
+          spray_volume_unit: string | null
+          status: string
+          temperature_c: number | null
+          trial_id: string
+          updated_at: string
+          voided_at: string | null
+          voided_by: string | null
+          voided_reason: string | null
+          wind_speed_kmh: number | null
+        }
+        Insert: {
+          applied_at: string
+          client_id: string
+          created_at?: string
+          created_by?: string
+          equipment?: string | null
+          id?: string
+          notes?: string | null
+          operator_name?: string | null
+          relative_humidity_pct?: number | null
+          spray_volume?: number | null
+          spray_volume_unit?: string | null
+          status?: string
+          temperature_c?: number | null
+          trial_id: string
+          updated_at?: string
+          voided_at?: string | null
+          voided_by?: string | null
+          voided_reason?: string | null
+          wind_speed_kmh?: number | null
+        }
+        Update: {
+          applied_at?: string
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          equipment?: string | null
+          id?: string
+          notes?: string | null
+          operator_name?: string | null
+          relative_humidity_pct?: number | null
+          spray_volume?: number | null
+          spray_volume_unit?: string | null
+          status?: string
+          temperature_c?: number | null
+          trial_id?: string
+          updated_at?: string
+          voided_at?: string | null
+          voided_by?: string | null
+          voided_reason?: string | null
+          wind_speed_kmh?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_variables: {
         Row: {
           created_at: string
@@ -142,6 +230,271 @@ export type Database = {
             columns: ["trial_id"]
             isOneToOne: false
             referencedRelation: "trials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      field_record_photos: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string
+          field_record_id: string
+          id: string
+          latitude: number | null
+          location_accuracy_m: number | null
+          longitude: number | null
+          status: string
+          storage_path: string
+          taken_at: string | null
+          trial_id: string
+          updated_at: string
+          voided_at: string | null
+          voided_by: string | null
+          voided_reason: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string
+          field_record_id: string
+          id?: string
+          latitude?: number | null
+          location_accuracy_m?: number | null
+          longitude?: number | null
+          status?: string
+          storage_path: string
+          taken_at?: string | null
+          trial_id: string
+          updated_at?: string
+          voided_at?: string | null
+          voided_by?: string | null
+          voided_reason?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          field_record_id?: string
+          id?: string
+          latitude?: number | null
+          location_accuracy_m?: number | null
+          longitude?: number | null
+          status?: string
+          storage_path?: string
+          taken_at?: string | null
+          trial_id?: string
+          updated_at?: string
+          voided_at?: string | null
+          voided_by?: string | null
+          voided_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "field_record_photos_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_record_photos_record_fkey"
+            columns: ["field_record_id", "trial_id"]
+            isOneToOne: false
+            referencedRelation: "field_records"
+            referencedColumns: ["id", "trial_id"]
+          },
+          {
+            foreignKeyName: "field_record_photos_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_record_photos_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      field_records: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string
+          id: string
+          latitude: number | null
+          location_accuracy_m: number | null
+          longitude: number | null
+          notes: string | null
+          planned_assessment_id: string
+          plot_id: string
+          recorded_at: string
+          status: string
+          trial_id: string
+          updated_at: string
+          value_numeric: number | null
+          value_text: string | null
+          voided_at: string | null
+          voided_by: string | null
+          voided_reason: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          latitude?: number | null
+          location_accuracy_m?: number | null
+          longitude?: number | null
+          notes?: string | null
+          planned_assessment_id: string
+          plot_id: string
+          recorded_at?: string
+          status?: string
+          trial_id: string
+          updated_at?: string
+          value_numeric?: number | null
+          value_text?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+          voided_reason?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          latitude?: number | null
+          location_accuracy_m?: number | null
+          longitude?: number | null
+          notes?: string | null
+          planned_assessment_id?: string
+          plot_id?: string
+          recorded_at?: string
+          status?: string
+          trial_id?: string
+          updated_at?: string
+          value_numeric?: number | null
+          value_text?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+          voided_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "field_records_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_records_planned_assessment_fkey"
+            columns: ["planned_assessment_id", "trial_id"]
+            isOneToOne: false
+            referencedRelation: "planned_assessments"
+            referencedColumns: ["id", "trial_id"]
+          },
+          {
+            foreignKeyName: "field_records_plot_fkey"
+            columns: ["plot_id", "trial_id"]
+            isOneToOne: false
+            referencedRelation: "plots"
+            referencedColumns: ["id", "trial_id"]
+          },
+          {
+            foreignKeyName: "field_records_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_records_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      occurrences: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          occurred_at: string
+          plot_id: string | null
+          status: string
+          trial_id: string
+          updated_at: string
+          voided_at: string | null
+          voided_by: string | null
+          voided_reason: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string
+          description: string
+          id?: string
+          occurred_at: string
+          plot_id?: string | null
+          status?: string
+          trial_id: string
+          updated_at?: string
+          voided_at?: string | null
+          voided_by?: string | null
+          voided_reason?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          occurred_at?: string
+          plot_id?: string | null
+          status?: string
+          trial_id?: string
+          updated_at?: string
+          voided_at?: string | null
+          voided_by?: string | null
+          voided_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "occurrences_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "occurrences_plot_fkey"
+            columns: ["plot_id", "trial_id"]
+            isOneToOne: false
+            referencedRelation: "plots"
+            referencedColumns: ["id", "trial_id"]
+          },
+          {
+            foreignKeyName: "occurrences_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "occurrences_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -291,6 +644,74 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      quality_flags: {
+        Row: {
+          comment: string | null
+          created_at: string
+          created_by: string
+          field_record_id: string | null
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          status: string
+          trial_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          created_by?: string
+          field_record_id?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          status?: string
+          trial_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          created_by?: string
+          field_record_id?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          status?: string
+          trial_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quality_flags_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quality_flags_handled_by_fkey"
+            columns: ["handled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quality_flags_record_fkey"
+            columns: ["field_record_id", "trial_id"]
+            isOneToOne: false
+            referencedRelation: "field_records"
+            referencedColumns: ["id", "trial_id"]
+          },
+          {
+            foreignKeyName: "quality_flags_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trials"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       treatment_factor_levels: {
         Row: {
@@ -506,6 +927,7 @@ export type Database = {
       has_trial_access: { Args: { p_trial_id: string }; Returns: boolean }
       is_coordination: { Args: never; Returns: boolean }
       is_trial_member: { Args: { p_trial_id: string }; Returns: boolean }
+      storage_object_trial_id: { Args: { p_name: string }; Returns: string }
     }
     Enums: {
       app_role: "coordination" | "field" | "home_office"

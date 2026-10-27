@@ -62,3 +62,26 @@ insert into public.assessment_variables (id, trial_id, name, unit, method, scale
 insert into public.planned_assessments (id, trial_id, variable_id, days_after, reference_event, planned_date, responsible_id) values
   ('33000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000001', '32000000-0000-4000-8000-000000000001',
    14, 'planting', '2026-11-15', '10000000-0000-4000-8000-000000000002');
+
+-- ---------------------------------------------------------------------------
+-- Tarefa 007: dados de campo fictícios no ENS-TESTE-01 (autor: usuário field do seed)
+-- ---------------------------------------------------------------------------
+insert into public.field_records (id, client_id, trial_id, plot_id, planned_assessment_id, value_numeric, recorded_at, notes, created_by) values
+  ('40000000-0000-4000-8000-000000000001', '41000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000001',
+   '31000000-0000-4000-8000-000000000101', '33000000-0000-4000-8000-000000000001', 42, '2026-11-15 13:00:00+00', 'Registro fictício',
+   '10000000-0000-4000-8000-000000000002'),
+  ('40000000-0000-4000-8000-000000000002', '41000000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000001',
+   '31000000-0000-4000-8000-000000000102', '33000000-0000-4000-8000-000000000001', 38, '2026-11-15 13:05:00+00', null,
+   '10000000-0000-4000-8000-000000000002');
+
+insert into public.applications (client_id, trial_id, applied_at, equipment, spray_volume, spray_volume_unit, temperature_c, relative_humidity_pct, wind_speed_kmh, operator_name, created_by) values
+  ('42000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000001', '2026-11-02 11:00:00+00',
+   'Pulverizador costal fictício', 200, 'L/ha', 25, 70, 5, 'Operador Fictício', '10000000-0000-4000-8000-000000000002');
+
+insert into public.occurrences (client_id, trial_id, plot_id, occurred_at, description, created_by) values
+  ('43000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000001', '31000000-0000-4000-8000-000000000201',
+   '2026-11-10 18:00:00+00', 'Ocorrência fictícia', '10000000-0000-4000-8000-000000000002');
+
+insert into public.quality_flags (trial_id, field_record_id, status, comment, created_by) values
+  ('20000000-0000-4000-8000-000000000001', '40000000-0000-4000-8000-000000000002', 'correction_requested',
+   'Conferir valor (fictício)', '10000000-0000-4000-8000-000000000003');

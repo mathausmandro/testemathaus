@@ -11,7 +11,7 @@ Fluxo de cada tarefa: analista, desenvolvedor, qa, performance, seguranca. Statu
 | 004 | [Supabase local e variáveis de ambiente](004-supabase-local.md) | 1 | pronta para validação (requer Docker/Supabase) | sonnet | 001, 002 | - | - | - |
 | 005 | [Migration: perfis, ensaios, atribuição e RLS base](005-migration-perfis-e-ensaios.md) | 1 | pronta para validação (requer Docker/Supabase) | opus | 004 | - | - | - |
 | 006 | [Migration: estrutura do protocolo](006-migration-protocolo.md) | 1 | pronta para validação (requer Docker/Supabase) | opus | 005 | - | - | - |
-| 007 | [Migration: dados de campo](007-migration-dados-de-campo.md) | 1 | a fazer | opus | 005, 006 | - | - | - |
+| 007 | [Migration: dados de campo](007-migration-dados-de-campo.md) | 1 | pronta para validação (requer Docker/Supabase) | opus | 005, 006 | - | - | - |
 | 008 | [Migration: histórico imutável](008-migration-historico-imutavel.md) | 1 | a fazer | opus | 007 | - | - | - |
 | 009 | [Migration: avisos, push e tokens do feed iCal](009-migration-avisos-e-calendario.md) | 1 | a fazer | opus | 005 | - | - | - |
 | 010 | [Testes pgTAP: matriz de acesso por perfil](010-matriz-de-acesso-pgtap.md) | 1 | a fazer | opus | 005 a 009 | - | - | - |
