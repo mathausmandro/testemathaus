@@ -24,7 +24,7 @@ package.json, tsconfig.json, eslint config, next.config.ts, tailwind config, vit
 - [ ] node -v, git --version, docker --version e supabase --version respondem; versões registradas em docs/ambiente.md.
 - [ ] npm ci seguido de npm run build termina sem erro.
 - [ ] npm run lint, typecheck, test, test:e2e, test:perf e test:security existem e passam no esqueleto.
-- [ ] A varredura de segredos (secretlint no local; gitleaks com .gitleaks.toml fica para o CI da tarefa 002, decisão do orquestrador em 27/10/2026 porque o binário não foi autorizado na máquina) passa e falha de propósito quando um segredo falso é colocado em arquivo de teste (verificado e depois removido).
+- [ ] A varredura de segredos (secretlint no local; gitleaks com .gitleaks.toml fica para o CI da tarefa 002, decisão do orquestrador em 27/10/2026 porque o binário não foi autorizado na máquina; aprovada pelo Mathaus em 27/10/2026) passa e falha de propósito quando um segredo falso é colocado em arquivo de teste (verificado e depois removido).
 - [ ] .env.local e qualquer .env com valores estão no .gitignore; .env.example só tem nomes.
 - [ ] Nenhuma variável NEXT_PUBLIC contém segredo; SUPABASE_SECRET_KEY não tem prefixo NEXT_PUBLIC.
 - [ ] Repositório git inicializado com pelo menos um commit limpo.

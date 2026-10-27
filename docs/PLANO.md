@@ -5,7 +5,7 @@ Cerca de 20 semanas, começando por um ensaio piloto.
 ## Status
 
 - [ ] Fase 0: Alinhamento
-- [ ] Fase 1: Base, login e ambientes (em andamento: 001 pronta em 27/10/2026, com Docker pendente pela TI)
+- [ ] Fase 1: Base, login e ambientes (em andamento: 001 pronta em 27/10/2026, com Docker pendente pela TI; 002 em QA)
 - [ ] Fase 2: Geração automática
 - [ ] Fase 3: Coleta de campo
 - [ ] Fase 4: Avisos e calendário

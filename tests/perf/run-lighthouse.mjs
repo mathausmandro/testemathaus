@@ -7,10 +7,13 @@ import os from "node:os";
 import path from "node:path";
 
 const PORT = 3200;
-const LHCI_VERSION = "0.15.1";
 const isWin = process.platform === "win32";
 const npm = isWin ? "npm.cmd" : "npm";
 const npx = isWin ? "npx.cmd" : "npx";
+const skipBuild = process.argv.includes("--skip-build");
+// /cli fica isolado em tools/lhci (package-lock próprio, npm ci --ignore-scripts).
+const LHCI_DIR = path.resolve("tools", "lhci");
+const LHCI_CLI = path.join(LHCI_DIR, "node_modules", "@lhci", "cli", "src", "cli.js");
 const run = (cmd, args, opts = {}) =>
   spawnSync(cmd, args, { stdio: "inherit", shell: isWin, ...opts });
 
@@ -48,8 +51,15 @@ if (!process.env.CHROME_PATH) {
   }
 }
 
-const build = run(npm, ["run", "build"]);
-if (build.status !== 0) process.exit(build.status ?? 1);
+if (!fs.existsSync(LHCI_CLI)) {
+  const inst = run(npm, ["ci", "--ignore-scripts", "--no-audit", "--no-fund", "--prefix", LHCI_DIR]);
+  if (inst.status !== 0) process.exit(inst.status ?? 1);
+}
+
+if (!skipBuild) {
+  const build = run(npm, ["run", "build"]);
+  if (build.status !== 0) process.exit(build.status ?? 1);
+}
 
 const server = spawn(npx, ["next", "start", "-p", String(PORT)], { stdio: "inherit", shell: isWin });
 const stop = () => {
@@ -71,7 +81,7 @@ async function waitReady() {
 let code = 1;
 try {
   if (await waitReady()) {
-    const lh = run(npx, ["--yes", `@lhci/cli@${LHCI_VERSION}`, "autorun", "--config=lighthouserc.json"]);
+    const lh = run(process.execPath, [LHCI_CLI, "autorun", "--config=lighthouserc.json"], { shell: false });
     code = lh.status ?? 1;
   } else {
     console.error("Servidor não respondeu a tempo.");

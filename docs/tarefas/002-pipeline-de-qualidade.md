@@ -1,5 +1,5 @@
 # 002 - Pipeline de qualidade, segurança e performance
-Fase: 1 | Status: a fazer | Modelo do desenvolvedor: sonnet
+Fase: 1 | Status: em QA | Modelo do desenvolvedor: sonnet
 
 ## Objetivo
 Criar um único comando local e um fluxo de CI que rodem, em ordem, lint, tipos, testes unitários, pgTAP, e2e, Lighthouse, npm audit e gitleaks, de modo que qualidade, segurança e performance sejam verificadas desde a Fase 1 e cada tarefa seguinte apenas acrescente seus testes.
@@ -45,4 +45,31 @@ Unitários: teste do script verify (ordem e código de saída), se for script pr
 - O CI será no GitHub Actions? (Depende do repositório remoto.)
 - Qual nível mínimo de performance e acessibilidade aceitar nas telas de campo (sugestão inicial: 90 em ambos)?
 
+## Decisões (27/10/2026)
+- Mathaus aprovou: secretlint no local e gitleaks no CI.
+- Workflow escrito para GitHub Actions; só roda quando o repositório remoto existir (ainda pendente).
+- Limiares iniciais, até o Mathaus definir outros: performance 0,85 (orçamento do AGENTS), acessibilidade 0,90, boas práticas 0,90.
+
 ## Entrega (preenchido pelo desenvolvedor)
+
+### Arquivos alterados (27/10/2026)
+- Novos: scripts/verify.mjs, .github/workflows/ci.yml, docs/qualidade.md, tools/lhci/package.json e package-lock.json, tests/unit/verify.test.ts, tests/unit/ci-workflow.test.ts, tests/security/env-example.test.ts.
+- Alterados: package.json e package-lock.json (script verify, test:security com tests/security, devDependency yaml para validar o workflow), lighthouserc.json, tests/perf/run-lighthouse.mjs (usa tools/lhci, flag --skip-build), .gitleaks.toml, .secretlintignore, .gitignore, vitest.config.mts, docs/ambiente.md, docs/PLANO.md, INDICE.
+
+### Como testar
+1. `npm ci --ignore-scripts` e `npm run verify`: 9 etapas, saída 0 (167 s; pgTAP "ignorada: Supabase local ausente").
+2. `npm test` (verify, workflow e segurança) e `npm run test:security`.
+3. `CI=true npm run verify`: deve reprovar na etapa pgTAP enquanto não houver Supabase local.
+4. Detalhes, limiares e como acrescentar testes: docs/qualidade.md.
+
+### Resultados
+- verify de ponta a ponta: OK em 167 s. Lighthouse (3 execuções, asserções em error) passou.
+- Falhas propositais, todas revertidas (git status idêntico ao inicial; package.json/lock restaurados): lint (verify parou, saída 1, etapas seguintes não executadas), tipo (2), teste (1), segredo falso em arquivo e em .env.example (1), lodash@4.17.20 só no lockfile (npm audit 1).
+- Workflow: validado por teste Vitest com o pacote yaml (estrutura, permissions contents: read, actions por SHA, checksum do gitleaks, artefatos com always(), sem secrets). Não é actionlint: não foi validado por uma ferramenta específica de GitHub Actions.
+- S1: @lhci/cli em tools/lhci, npm ci --ignore-scripts; npm audit da raiz não o cobre (16 avisos, 13 altos, exceção documentada). S3/S4: .env.example e package-lock.json varridos; allowlist em [[allowlists]]. S5: tests/security roda no test:security. S7: CLI Supabase 2.122 não tem postinstall; CI usa npm ci --ignore-scripts.
+
+### Desvios e pendências
+- Sem Docker/Supabase local e sem remoto: a etapa pgTAP real e o workflow não foram executados. gitleaks só roda no CI (não testado aqui; versão 8.30.1 e checksum vieram da release oficial).
+- No CI, enquanto supabase/config.toml não existir (tarefa 004), o pgTAP reprova de propósito, conforme a regra pedida; o workflow ainda nem roda sem repositório remoto. Na 004 será preciso mapear as chaves do `supabase status` para NEXT_PUBLIC_* no workflow.
+- verify usa `playwright test` e Lighthouse com --skip-build após a etapa build (evita 3 builds); test:e2e e test:perf continuam fazendo build quando rodados sozinhos.
+- Dúvidas do Mathaus seguem abertas: confirmar GitHub Actions e nível mínimo nas telas de campo.

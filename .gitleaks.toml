@@ -1,15 +1,15 @@
-# Configuração base do gitleaks, usada no CI (tarefa 002).
+# Configuração base do gitleaks, usada só no CI (tarefa 002; o binário não é instalado localmente).
 # Localmente a varredura é feita pelo secretlint (npm run test:security).
 title = "Plataforma de Ensaios"
 
 [extend]
 useDefault = true
 
-[allowlist]
-description = "Arquivos gerados ou sem segredos reais"
+# Formato atual (gitleaks 8.25+). Só pastas de dependência e build, que nem são versionadas.
+# .env.example e package-lock.json são varridos de propósito (S3 e S4).
+[[allowlists]]
+description = "Pastas de dependências e build (não versionadas)"
 paths = [
-  '''node_modules/''',
-  '''\.next/''',
-  '''package-lock\.json''',
-  '''\.env\.example''',
+  '''(^|/)node_modules/''',
+  '''(^|/)\.next/''',
 ]
