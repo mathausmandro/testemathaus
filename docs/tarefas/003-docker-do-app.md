@@ -1,5 +1,5 @@
 # 003 - Docker do app e docker compose
-Fase: 1 | Status: a fazer | Modelo do desenvolvedor: sonnet
+Fase: 1 | Status: pronta para validação (requer Docker/Supabase) | Modelo do desenvolvedor: sonnet
 
 ## Objetivo
 Rodar o app Next.js em container com perfis dev e prod, com imagem final enxuta e sem privilégio de administrador, seguindo a skill docker-local-env.
@@ -39,3 +39,21 @@ Unitários: não se aplica. e2e: fumaça Playwright contra o container prod. Per
 - Nenhuma de domínio. Confirmar apenas se a TI permite Docker Desktop (ver 001).
 
 ## Entrega (preenchido pelo desenvolvedor)
+
+Não executado: requer Docker/Supabase local (orientação de 27/10/2026: docs/tarefas/ORIENTACAO-SEM-DOCKER.md).
+
+### Arquivos alterados
+- Novos: `Dockerfile`, `docker-compose.yml`, `.dockerignore`, `tests/unit/docker.test.ts`.
+- Alterados: `next.config.ts` (`output: "standalone"`), `docs/ambiente.md` (seção "Docker do app"), `docs/tarefas/INDICE.md`.
+
+### O que foi feito
+- Dockerfile em 4 etapas (deps, dev, build, runner); `node:24-alpine`; `USER node` no dev e no runner; só NEXT_PUBLIC_* como ARG de build; nenhuma menção a SUPABASE_SECRET_KEY.
+- Compose com perfis `dev` (volumes, polling para hot reload) e `prod` (imagem final, somente leitura, cap_drop ALL, no-new-privileges); `env_file: .env.local`; `host.docker.internal` via `extra_hosts`.
+- `.dockerignore` exclui `.env*` (reabre só `.env.example`), node_modules, .next, supabase/.temp, .git, .docx.
+
+### Como testar
+- Sem Docker: `npm test` (inclui `tests/unit/docker.test.ts`, verificação estática do Dockerfile, compose e .dockerignore).
+- Com Docker (pendente, parceiro): `docker compose --profile dev up --build` e `--profile prod up --build`, abrir http://localhost:3000; `docker compose run --rm app-prod whoami` (node); `docker history --no-trunc`; editar `src/app/page.tsx` no perfil dev e ver recarregar; registrar tamanho da imagem em docs/ambiente.md.
+
+### Critérios de aceite
+Todos os que dependem de container estão pendentes (requerem Docker). Acesso por perfil: não se aplica. O teste e2e de fumaça contra o container prod também ficou pendente.

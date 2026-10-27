@@ -57,3 +57,22 @@ Registro das versões usadas na tarefa 001 (máquina Windows 11, PowerShell 5.1)
 - Repositório remoto: aguardando decisão do Mathaus.
 - O `chrome.exe` do Playwright não inicia nesta máquina (erro de configuração lado a lado do Windows); o Lighthouse usa o chrome-headless-shell do Playwright.
 - Docker Desktop: depende da TI. Registrar a versão aqui quando instalado.
+
+## Docker do app (tarefa 003)
+
+Não executado: requer Docker/Supabase local. Escrito e validado estaticamente (`tests/unit/docker.test.ts`); a validação real fica para o parceiro (docs/tarefas/ORIENTACAO-SEM-DOCKER.md).
+
+Arquivos: `Dockerfile` (etapas deps, dev, build, runner), `docker-compose.yml` (perfis dev e prod), `.dockerignore`, `output: "standalone"` em `next.config.ts`.
+
+```
+docker compose --profile dev up --build    # hot reload (polling), http://localhost:3000
+docker compose --profile prod up --build   # imagem final, http://localhost:3000
+```
+
+- Variáveis: `.env.local` (copiado de `.env.example`) lido por `env_file` em tempo de execução. A imagem não contém `.env*` nem `SUPABASE_SECRET_KEY`. Só `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` entram como argumento de build (valores públicos, embutidos no navegador).
+- Supabase local no host: dentro do container use `http://host.docker.internal:54321` em `NEXT_PUBLIC_SUPABASE_URL` (mapeado por `extra_hosts`). No navegador do host o mesmo valor não resolve; o ajuste fino da rede fica para a validação com a tarefa 004.
+- Perfil dev: o código vai por volume (`.:/app`), então o `.env.local` do host fica visível dentro do container de desenvolvimento (apenas local). `WATCHPACK_POLLING` compensa o sistema de arquivos do Docker Desktop no Windows.
+- Perfil prod: usuário `node` (não root), sistema de arquivos somente leitura, `cap_drop: ALL`, `no-new-privileges`.
+- Verificação da imagem (a fazer com Docker): `docker compose --profile prod build`, `docker run --rm <imagem> whoami` (esperado: node), `docker history --no-trunc <imagem>` e `docker run --rm <imagem> sh -c "ls -a; env"` sem `.env` nem `SUPABASE_SECRET_KEY`.
+- Tamanho da imagem final e tempo de build: pendentes (registrar aqui após o primeiro build).
+- `next start` (usado pelo e2e e pelo Lighthouse) continua funcionando com `output: "standalone"`; o servidor da imagem é `node server.js`.

@@ -1,0 +1,21 @@
+# Contexto de build enxuto e sem segredos
+.git
+.gitignore
+.github
+node_modules
+.next
+out
+build
+coverage
+test-results
+playwright-report
+.lighthouseci
+tools/lhci/node_modules
+supabase/.temp
+.env*
+!.env.example
+*.pem
+*.docx
+npm-debug.log*
+.vercel
+.DS_Store
