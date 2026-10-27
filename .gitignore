@@ -1,0 +1,30 @@
+# dependencias
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# testes e relatorios
+/coverage
+/test-results
+/playwright-report
+/.lighthouseci
+
+# supabase local
+supabase/.temp
+
+# variaveis de ambiente (so o .env.example e versionado)
+.env*
+!.env.example
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+.vercel

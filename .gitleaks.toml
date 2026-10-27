@@ -1,0 +1,15 @@
+# Configuração base do gitleaks, usada no CI (tarefa 002).
+# Localmente a varredura é feita pelo secretlint (npm run test:security).
+title = "Plataforma de Ensaios"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Arquivos gerados ou sem segredos reais"
+paths = [
+  '''node_modules/''',
+  '''\.next/''',
+  '''package-lock\.json''',
+  '''\.env\.example''',
+]
