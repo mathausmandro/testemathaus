@@ -1,4 +1,4 @@
-// Faz build, sobe o servidor, roda Lighthouse CI sobre a página inicial e encerra o servidor.
+// Faz build, sobe o servidor, roda Lighthouse CI sobre as páginas públicas de lighthouserc.json (inicial e login) e encerra o servidor.
 // Relatórios ficam em .lighthouseci (upload target filesystem; nada sai da máquina).
 import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";

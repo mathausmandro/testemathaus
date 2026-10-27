@@ -18,7 +18,7 @@ Fluxo de cada tarefa: analista, desenvolvedor, qa, performance, seguranca. Statu
 | 011 | [Camada de acesso a dados tipada](011-camada-de-dados.md) | 1 | pronta para validação (requer Docker/Supabase) | sonnet | 004, 005, 006 | - | - | - |
 | 012 | [Login Microsoft configurável e sessão](012-login-microsoft-configuravel.md) | 1 | pronta para validação (requer Docker/Supabase e Entra ID) | opus | 004, 005 | - | - | - |
 | 013 | [Hook de domínio de e-mail](013-hook-de-dominio-de-email.md) | 1 | pronta para validação (requer Docker/Supabase) | opus | 004, 005 | - | - | - |
-| 014 | [proxy.ts e tela Aguardando liberação](014-proxy-e-aguardando-liberacao.md) | 1 | a fazer | opus | 011, 012 | - | - | - |
+| 014 | [proxy.ts e tela Aguardando liberação](014-proxy-e-aguardando-liberacao.md) | 1 | pronta para validação (requer Docker/Supabase) | opus | 011, 012 | - | - | - |
 | 015 | [Administração de perfis e atribuição de ensaios](015-administracao-de-perfis-e-atribuicao.md) | 1 | a fazer | opus | 005, 008, 011, 014 | - | - | - |
 | 016 | [Ensaio de teste e telas mínimas](016-ensaio-de-teste-e-telas-minimas.md) | 1 | a fazer | sonnet | 006, 011, 014 (015 em paralelo) | - | - | - |
 | 017 | [Cabeçalhos, validação e suíte test:security](017-cabecalhos-validacao-e-testes-de-seguranca.md) | 1 | a fazer | opus | 001, 002, 014 | - | - | - |

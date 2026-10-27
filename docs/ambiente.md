@@ -34,7 +34,7 @@ Registro das versões usadas na tarefa 001 (máquina Windows 11, PowerShell 5.1)
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm test` | testes unitários (Vitest) |
 | `npm run test:e2e` | build e testes de ponta a ponta (Playwright, Chromium) na porta 3100 |
-| `npm run test:perf` | build, sobe o servidor na porta 3200 e roda Lighthouse CI sobre a página inicial; relatórios em `.lighthouseci` (upload filesystem, nada sai da máquina) |
+| `npm run test:perf` | build, sobe o servidor na porta 3200 e roda Lighthouse CI sobre a página inicial e a de login (públicas; ver lighthouserc.json); relatórios em `.lighthouseci` (upload filesystem, nada sai da máquina) |
 | `npm run test:security` | secretlint, `npm audit --audit-level=high` e testes de tests/security |
 | `npm run verify` | pipeline completo (docs/qualidade.md) |
 
