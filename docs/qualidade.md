@@ -46,9 +46,10 @@ Exceção documentada: o `npm audit` da raiz **não cobre** `tools/lhci/`, porqu
 ## Segredos e CI
 
 - Local: secretlint. CI: gitleaks 8.30.1, binário oficial baixado no runner com checksum SHA-256 fixo, varrendo o histórico (`gitleaks git`) e a árvore (`gitleaks dir`) com `--redact`.
-- `.env.example` e `package-lock.json` são varridos de propósito (S3, S4). Só `node_modules/` e `.next/` ficam fora no gitleaks.
+- `.env.example` é varrido de propósito (S3). Só `node_modules/` e `.next/` ficam fora pela nossa allowlist.
+- Limitação (G1): a allowlist padrão do gitleaks (`useDefault`) ignora lockfiles, então o `package-lock.json` **não** é varrido pelo gitleaks. Não há forma confiável de removê-la sem o binário para validar (não instalado aqui). O lockfile é coberto localmente pelo secretlint (etapa Segredos do verify) e pelo `npm audit`. Reavaliar ao atualizar o gitleaks.
 - O workflow usa `permissions: contents: read`, actions fixadas por SHA, nenhum `secrets.*` e nenhuma `SUPABASE_SECRET_KEY`; no CI só valem valores do Supabase local de teste.
-- Relatórios (Playwright, resultados e Lighthouse) são publicados como artefato mesmo com falha.
+- Relatórios (Playwright, resultados e Lighthouse) são publicados como artefato mesmo com falha. `.lighthouseci/` é pasta oculta, por isso o passo usa `include-hidden-files: true`; nenhum caminho enviado inclui `.env*` (testado).
 - S7: a CLI do Supabase 2.122 não tem script de instalação (o binário vem de pacote npm com integridade no lockfile). O CI usa `npm ci --ignore-scripts`; os únicos scripts do lockfile são de `fsevents` (só macOS) e `unrs-resolver` (fallback), dispensáveis.
 - Teste de segurança S5: `tests/security/env-example.test.ts` (só nomes no `.env.example`, nenhum segredo em `NEXT_PUBLIC_*`).
 
@@ -69,3 +70,16 @@ Cada caso foi introduzido, a etapa correspondente falhou e tudo foi revertido (c
 ## Tempo do verify no esqueleto
 
 `npm run verify` no esqueleto (Windows 11, Node 24, instalação com `npm ci --ignore-scripts`, sem Docker): **167 s** (2 min 47 s) em 27/10/2026. Por etapa: segredos 4,5 s, audit 2,6 s, lint 10,8 s, tipos 9,3 s, unitários 14,4 s, pgTAP ignorada (Supabase local ausente), build 42,1 s, e2e 11,7 s, Lighthouse (3 execuções) 65,8 s. Em outra máquina ou no CI o tempo varia.
+
+Medições do `npm run verify` (27/10/2026, mesma máquina): **167 s** (desenvolvedor), **194 s** (QA), **217 s** (performance); a variação entre execuções chega a 30%.
+
+Divisão por etapa (performance, 217 s): segredos 7,8 s, audit 2,6 s, lint 45,4 s (atípico; 10,8 a 11,2 s nas outras medições), tipos 10,3 s, unitários 11,7 s, pgTAP ignorada 8,6 s (gasto só para descobrir que não há Supabase), build 18,6 s, e2e 14,3 s, Lighthouse 97,9 s (66 a 110 s). O Lighthouse é cerca de 45% do total.
+
+### Pendência: cache e paralelização no CI (docs/performance/002.md)
+
+Não implementado. Recomendações para quando o CI rodar de verdade:
+1. Cache do Chromium do Playwright (`~/.cache/ms-playwright`, chave pelo hash do `package-lock.json`); com cache, rodar só `playwright install-deps chromium`.
+2. Cache de `.next/cache` e de `tools/lhci/node_modules` (o workflow precisa de `npm ci --prefix tools/lhci --ignore-scripts`).
+3. Separar lint, tipos e unitários em jobs paralelos ao build/e2e/Lighthouse.
+4. Pular a tentativa do pgTAP no modo local quando `supabase/config.toml` não existe (poupa 8,6 s).
+5. Se o Lighthouse reprovar de forma intermitente no runner, subir para 5 execuções ou descartar a fria antes de relaxar limiares.

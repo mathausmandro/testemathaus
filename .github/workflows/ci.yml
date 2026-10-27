@@ -81,5 +81,8 @@ jobs:
             playwright-report/
             test-results/
             .lighthouseci/
+          # .lighthouseci/ é pasta oculta: sem isto o upload-artifact a ignora.
+          # Nenhum caminho acima inclui .env*; o teste do workflow garante isso.
+          include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 14

@@ -73,3 +73,9 @@ Unitários: teste do script verify (ordem e código de saída), se for script pr
 - No CI, enquanto supabase/config.toml não existir (tarefa 004), o pgTAP reprova de propósito, conforme a regra pedida; o workflow ainda nem roda sem repositório remoto. Na 004 será preciso mapear as chaves do `supabase status` para NEXT_PUBLIC_* no workflow.
 - verify usa `playwright test` e Lighthouse com --skip-build após a etapa build (evita 3 builds); test:e2e e test:perf continuam fazendo build quando rodados sozinhos.
 - Dúvidas do Mathaus seguem abertas: confirmar GitHub Actions e nível mínimo nas telas de campo.
+
+### Correções pós-revisão
+- ci.yml: `include-hidden-files: true` no upload (o `.lighthouseci/` é oculto); playwright-report/ e test-results/ já enviados; nenhum caminho inclui `.env*`. tests/unit/ci-workflow.test.ts cobre os três pontos.
+- G1: a allowlist padrão do gitleaks ignora o package-lock.json e não há forma confiável de removê-la sem o binário. Limitação documentada em .gitleaks.toml (comentário corrigido) e docs/qualidade.md; o secretlint cobre o lockfile localmente.
+- docs/qualidade.md: medições do verify (167/194/217 s), divisão por etapa e recomendações de cache como pendência.
+- G2 e G3 registrados na tarefa 017 (seção "Herdado da tarefa 002").

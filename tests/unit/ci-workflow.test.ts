@@ -39,6 +39,18 @@ describe("workflow de CI", () => {
     const path = String((up?.with as { path: string }).path);
     expect(path).toContain("playwright-report/");
     expect(path).toContain(".lighthouseci/");
+    expect(path).toContain("test-results/");
+  });
+
+  it("envia pasta oculta do Lighthouse e nenhum .env nos artefatos", () => {
+    const up = steps.find((s) => String(s.uses).startsWith("actions/upload-artifact"));
+    const w = up?.with as { path: string; "include-hidden-files"?: boolean };
+    expect(w["include-hidden-files"]).toBe(true);
+    const paths = String(w.path).split(/\s+/).filter(Boolean);
+    for (const p of paths) {
+      expect(p).not.toMatch(/\.env/);
+      expect(p).not.toMatch(/^(\.|\*+\/?)$/);
+    }
   });
 
   it("não usa secrets nem SUPABASE_SECRET_KEY", () => {

@@ -35,6 +35,10 @@ Unitários: utilitário de validação. e2e: sem erros de CSP nas telas existent
 - Segurança S2: CSP, HSTS e frame-ancestors faltam no next.config.ts (docs/seguranca/001.md).
 - Segurança S6: dados de ensaio nunca em `use cache` compartilhado (cacheComponents ligado); acrescentar regra à skill nextjs-app-router.
 
+## Herdado da tarefa 002
+- G2: quando houver e2e autenticado, os artefatos do Playwright (traces, vídeos, screenshots, storage state) podem conter sessão/tokens; não publicá-los no CI sem sanitizar ou restringir (docs/seguranca/002.md).
+- G3: teste de segurança que falhe se `SUPABASE_SECRET_KEY` aparecer em arquivo com a diretiva `"use client"` (e em qualquer `NEXT_PUBLIC_*`).
+
 ## Dúvidas para o Mathaus
 - Nenhuma. Os domínios definitivos (Vercel e Supabase) serão necessários na tarefa 018 para fechar o CSP de produção.
 

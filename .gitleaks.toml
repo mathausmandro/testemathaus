@@ -5,8 +5,14 @@ title = "Plataforma de Ensaios"
 [extend]
 useDefault = true
 
+# LIMITAÇÃO CONHECIDA (G1): a allowlist global das regras padrão do gitleaks ignora arquivos de
+# lockfile, incluindo package-lock.json. Uma allowlist de extensão só acrescenta exceções; não
+# há como remover a do padrão sem o binário para validar uma cópia das regras. Portanto o
+# gitleaks NÃO varre o package-lock.json. Quem cobre o lockfile é o secretlint local
+# (npm run verify, etapa Segredos) e o npm audit. Reavaliar ao atualizar o gitleaks.
+
 # Formato atual (gitleaks 8.25+). Só pastas de dependência e build, que nem são versionadas.
-# .env.example e package-lock.json são varridos de propósito (S3 e S4).
+# .env.example é varrido de propósito (S3).
 [[allowlists]]
 description = "Pastas de dependências e build (não versionadas)"
 paths = [
