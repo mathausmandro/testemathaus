@@ -76,6 +76,16 @@ describe("decidirRota: com perfil", () => {
     expect(perfisDaArea("/admin")).toEqual(["coordination"]);
   });
 
+  it("lista e detalhe de ensaios valem para todos os perfis; criar só para coordination", () => {
+    for (const rota of ["/ensaios", "/ensaios/abc"]) {
+      expect(decidirRota(rota, "", CAMPO)).toEqual(seguir);
+      expect(decidirRota(rota, "", HOME)).toEqual(seguir);
+    }
+    expect(decidirRota("/ensaios/novo", "", COORD)).toEqual(seguir);
+    expect(decidirRota("/ensaios/novo", "", CAMPO)).toEqual(ir("/inicio"));
+    expect(decidirRota("/ensaios/novo/", "", HOME)).toEqual(ir("/inicio"));
+  });
+
   it("nenhuma decisão redireciona para fora do site", () => {
     const estados = [ANON, SEM, COORD, CAMPO, HOME, ERRO];
     const caminhos = ["/", "/login", "/inicio", "/admin", "/aguardando", "/x", "//outro-site.example"];

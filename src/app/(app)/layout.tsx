@@ -9,6 +9,7 @@ import { perfisDaArea } from "@/lib/auth/routes";
 // cada página chama exigirPerfilNaPagina com os perfis permitidos.
 const LINKS = [
   { href: "/inicio", rotulo: "Início" },
+  { href: "/ensaios", rotulo: "Ensaios" },
   { href: "/admin", rotulo: "Administração" },
 ] as const;
 

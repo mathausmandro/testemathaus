@@ -68,9 +68,9 @@ Rodou aqui: npm run lint, typecheck, npm test (358 testes), test:security e npm 
 ### Como testar
 1. Aqui: `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:security`, `npm run verify`.
 2. Com Docker: `npx supabase db reset`, `npx supabase test db` (inclui 015), `npx supabase gen types typescript --local` e comparar Functions (o gerador pode tipar `p_role` como não nulo; se tipar, manter `| null` ou trocar por cast em `setUserRole`).
-3. e2e: `.env.local` com `AUTH_LOCAL_PASSWORD_LOGIN=true`, `npm run build`, `E2E_SUPABASE=true npx playwright test tests/e2e/admin.spec.ts` logo após o `db reset`. Os passos "o ensaio aparece/some na lista da pessoa" dependem da lista `/ensaios` da tarefa 016 e são pulados enquanto ela não existir.
+3. e2e: `.env.local` com `AUTH_LOCAL_PASSWORD_LOGIN=true`, `npm run build`, `E2E_SUPABASE=true npx playwright test tests/e2e/admin.spec.ts` logo após o `db reset`. Os passos de visibilidade em `/ensaios` foram habilitados na tarefa 016.
 4. Manual: entrar como `coordenacao@exemplo.test`, abrir Administração > Pessoas e perfis, liberar `liberacao@exemplo.test`, atribuí-la ao ENS-TESTE-02 em Equipes dos ensaios, retirar e revogar; conferir o histórico em cada tela.
 
 ### Pendências e observações
 - Critérios "passa a ver só os ensaios atribuídos" e "o ensaio desaparece da lista dela" (e2e) ficam completos quando a 016 criar `/ensaios`; a regra em si já é garantida pela RLS (005/010).
-- Observação para QA (fora do escopo, não corrigido): `supabase/tests/010_matriz_de_acesso.test.sql` cria fixtures com ids `10000000-...-0001` a `0005`, os mesmos do seed (1 a 4); com o seed carregado, o `insert into auth.users` da 010 deve falhar por chave duplicada. Verificar no `supabase test db`.
+- Colisão de ids entre o pgTAP 010 e o seed: corrigida na tarefa 016 (usuários da 010 agora usam o prefixo a1000000-; os demais pgTAP já usavam prefixos próprios).

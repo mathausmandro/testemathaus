@@ -1,5 +1,5 @@
 # 016 - Cadastro e visualização do ensaio de teste (telas mínimas)
-Fase: 1 | Status: a fazer | Modelo do desenvolvedor: sonnet
+Fase: 1 | Status: pronta para validação (requer Docker/Supabase) | Modelo do desenvolvedor: sonnet
 
 ## Objetivo
 Entregar o critério de pronto da Fase 1: cadastrar um ensaio de teste e provar na interface que cada perfil vê só o que deve, usando telas mínimas próprias, sem depender do protótipo do Lovable.
@@ -39,3 +39,29 @@ Unitários: formulário e validações. e2e: um fluxo por perfil (coordination, 
 - Código do ensaio: há padrão de numeração (ex.: ano, sequência) que o sistema deve sugerir ou validar?
 
 ## Entrega (preenchido pelo desenvolvedor)
+
+**Não executado: requer Docker/Supabase local** (pgTAP, `db reset`, e2e autenticado `tests/e2e/ensaios.spec.ts` e Lighthouse das telas logadas). Executado aqui: lint, typecheck, `npm test` (374 testes), `test:security` e `npm run verify` (pgTAP ignorada por falta do Supabase local).
+
+### O que foi feito
+- Correção prévia (commit próprio): o pgTAP 010 usava os ids de usuário `10000000-...-0001` a `0005` do seed; agora usa o prefixo `a1000000-`. Os pgTAP 005 a 009 e 015 já usavam prefixos próprios (05, 06, 07, 08, 09, 15); nenhum caso foi enfraquecido.
+- Seed: já tinha dois ensaios fictícios (ENS-TESTE-01 com protocolo de 2 tratamentos e 4 parcelas; ENS-TESTE-02 sem protocolo) e os usuários dos três perfis; a tela marca todo código `ENS-TESTE-*` com o selo "Ensaio de teste · dados fictícios".
+- `/ensaios`: lista (cartões, mobile-first) via `listTrials`; a RLS decide o que aparece. Estado vazio diferente para coordination e demais perfis. Botão "Novo ensaio" só para coordination.
+- `/ensaios/novo`: só coordination (`exigirPerfilNaPagina(["coordination"])`, também no proxy via `PERFIS_POR_AREA`); formulário com Server Action `criarEnsaio` (`exigirPerfil` antes de ler o formulário, zod de `createTrialSchema`, código repetido vira erro no campo). Funciona sem JavaScript; único componente cliente além do `error.tsx`.
+- `/ensaios/[id]`: identificação, equipe (somente leitura), tratamentos e parcelas (`src/lib/data/protocol.ts`, novo, 2 consultas sem N+1). Ensaio fora da RLS ou id malformado responde 404.
+- Carregamento (Suspense), erro (`error.tsx`) e vazio, em pt-BR, com rótulos, `aria-*`, foco na mensagem de erro e tabelas com `caption`.
+- Navegação: link "Ensaios" no layout logado.
+
+### Arquivos
+- Telas: `src/app/(app)/ensaios/page.tsx`, `componentes.tsx`, `actions.ts`, `error.tsx`, `novo/page.tsx`, `novo/formulario.tsx`, `[id]/page.tsx`; `src/app/(app)/layout.tsx`.
+- Dados e regras: `src/lib/data/protocol.ts`, `src/lib/data/index.ts`, `src/lib/format.ts`, `src/lib/auth/routes.ts`.
+- Banco/testes: `supabase/tests/010_matriz_de_acesso.test.sql`.
+- Testes: `tests/unit/ensaios-actions.test.ts`, `tests/unit/ensaios-dados.test.ts`, `tests/unit/auth-routes.test.ts`, `tests/e2e/ensaios.spec.ts` (novo), `tests/e2e/admin.spec.ts` (passos de `/ensaios` habilitados), `tests/e2e/rotas-protegidas.spec.ts`.
+
+### Como testar
+1. Aqui: `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:security`, `npm run verify`.
+2. Com Docker: `npx supabase db reset`, `npx supabase test db` (010 sem colisão com o seed), `.env.local` com `AUTH_LOCAL_PASSWORD_LOGIN=true`, `npm run build`, `E2E_SUPABASE=true npx playwright test tests/e2e/ensaios.spec.ts tests/e2e/admin.spec.ts tests/e2e/perfis.spec.ts`.
+3. Manual: entrar com `campo@exemplo.test` (vê só ENS-TESTE-01; `/ensaios/20000000-0000-4000-8000-000000000002` dá 404), `escritorio@exemplo.test` (igual) e `coordenacao@exemplo.test` (vê os dois e cria um ensaio).
+
+### Pendências
+- Lighthouse das telas logadas (orçamento: 200 KB de JS inicial, desempenho >= 0,85) não roda sem sessão; falta um modo autenticado no `tests/perf` (precisa do Supabase local). As páginas são Server Components; só o formulário e o `error.tsx` vão ao cliente.
+- Itens da tarefa não incluídos por falta de definição: padrão de numeração do código do ensaio (sem validação de formato) e opções adicionais de delineamento.

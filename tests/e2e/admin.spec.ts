@@ -4,16 +4,12 @@
 // interferir em tests/e2e/perfis.spec.ts. Altera o banco: rode depois de `npx supabase db reset`.
 // Rodar com: .env.local com AUTH_LOCAL_PASSWORD_LOGIN=true; npm run build;
 //            E2E_SUPABASE=true npx playwright test tests/e2e/admin.spec.ts
-// A lista de ensaios da pessoa vem da tarefa 016 (/ensaios); sem ela, os passos de visibilidade são pulados.
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import { expect, test, type Browser, type Page } from "@playwright/test";
 
 const SENHA_DO_SEED = "senha-teste-local"; // fictícia, só no banco local (supabase/seed.sql)
 const PESSOA = { email: "liberacao@exemplo.test", nome: "Pessoa a Liberar", id: "10000000-0000-4000-8000-000000000006" };
 const ENSAIO = { id: "20000000-0000-4000-8000-000000000002", codigo: "ENS-TESTE-02" };
 const COORDENACAO_ID = "10000000-0000-4000-8000-000000000001";
-const TEM_LISTA_DE_ENSAIOS = existsSync(join(process.cwd(), "src", "app", "(app)", "ensaios", "page.tsx"));
 
 async function entrar(page: Page, email: string) {
   await page.goto("/login");
@@ -67,7 +63,7 @@ test.describe("administração com Supabase local", () => {
     await pessoa.goto("/inicio");
     await expect(pessoa).toHaveURL(/\/inicio$/);
     await expect(pessoa.getByText("Seu perfil: Campo.")).toBeVisible();
-    if (TEM_LISTA_DE_ENSAIOS) expect(await ensaiosVisiveis(pessoa)).not.toContain(ENSAIO.codigo);
+    expect(await ensaiosVisiveis(pessoa)).not.toContain(ENSAIO.codigo);
   });
 
   test("coordination atribui a um ensaio e retira; o ensaio aparece e some para a pessoa", async ({ page, browser }) => {
@@ -81,7 +77,7 @@ test.describe("administração com Supabase local", () => {
     await expect(page.getByRole("status")).toContainText("Pessoa atribuída ao ensaio.");
 
     const pessoa = await novaSessao(browser, PESSOA.email);
-    if (TEM_LISTA_DE_ENSAIOS) expect(await ensaiosVisiveis(pessoa)).toContain(ENSAIO.codigo);
+    expect(await ensaiosVisiveis(pessoa)).toContain(ENSAIO.codigo);
 
     await page.reload();
     await page.getByText(`Retirar ${PESSOA.nome} do ensaio`).click();
@@ -97,7 +93,7 @@ test.describe("administração com Supabase local", () => {
     await expect(historico.getByRole("row", { name: /Fim da etapa de campo/ })).toContainText("Retirada do ensaio");
     await expect(historico.getByRole("row", { name: /Atribuição ao ensaio pela coordenação/ })).toContainText("Atribuída ao ensaio");
 
-    if (TEM_LISTA_DE_ENSAIOS) expect(await ensaiosVisiveis(pessoa)).not.toContain(ENSAIO.codigo);
+    expect(await ensaiosVisiveis(pessoa)).not.toContain(ENSAIO.codigo);
   });
 
   test("coordination não altera o próprio perfil pela tela", async ({ page }) => {

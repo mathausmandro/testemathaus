@@ -17,6 +17,7 @@ export {
   type ListaDePessoas,
 } from "./profiles";
 export { listTrials, getTrial, createTrial, createTrialSchema, type CreateTrialInput } from "./trials";
+export { listTreatments, listPlots, type TratamentoResumo, type ParcelaResumo } from "./protocol";
 export {
   listTrialMembers,
   addTrialMember,

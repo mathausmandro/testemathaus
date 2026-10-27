@@ -15,6 +15,7 @@ export const ROTAS_PUBLICAS: readonly string[] = ["/", ROTA_LOGIN, ROTA_CALLBACK
 /** Áreas restritas a perfis específicos (prefixo → perfis). As demais áreas logadas valem para todos os perfis. */
 export const PERFIS_POR_AREA: Readonly<Record<string, readonly AppRole[]>> = {
   "/admin": ["coordination"],
+  "/ensaios/novo": ["coordination"],
 };
 
 export type EstadoDaSessao =

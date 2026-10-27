@@ -5,6 +5,9 @@ import { expect, test } from "@playwright/test";
 // confere que esta lista cobre todas as páginas protegidas.
 const ROTAS_LOGADAS = [
   "/inicio",
+  "/ensaios",
+  "/ensaios/x",
+  "/ensaios/novo",
   "/admin",
   "/admin/usuarios",
   "/admin/usuarios/x",
