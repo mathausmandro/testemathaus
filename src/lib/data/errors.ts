@@ -40,9 +40,9 @@ export function traduzirErro(erro: ErroBruto): DataError {
   let tipo: DataErrorCode = "internal";
   if (code === "42501" || status === 403) tipo = "forbidden"; // RLS ou privilégio negado
   else if (status === 401 || code === "PGRST301" || code === "PGRST303") tipo = "unauthenticated";
-  else if (code === "PGRST116") tipo = "not_found";
+  else if (code === "PGRST116" || code === "P0002") tipo = "not_found";
   else if (code === "23505") tipo = "conflict";
-  else if (["23502", "23503", "23514", "22P02", "22007", "22001"].includes(code)) tipo = "invalid";
+  else if (["23502", "23503", "23514", "22P02", "22007", "22001", "22023"].includes(code)) tipo = "invalid";
   else if (status === 503 || status === 502 || status === 504) tipo = "unavailable";
   return new DataError(tipo, undefined, { cause: erro });
 }

@@ -1172,6 +1172,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_add_trial_member: {
+        Args: { p_reason: string; p_trial_id: string; p_user_id: string }
+        Returns: string
+      }
+      admin_remove_trial_member: {
+        Args: { p_reason: string; p_trial_id: string; p_user_id: string }
+        Returns: undefined
+      }
+      admin_set_user_role: {
+        Args: {
+          p_reason: string
+          p_role: Database["public"]["Enums"]["app_role"] | null
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      admin_valid_reason: { Args: { p_reason: string }; Returns: string }
       can_record_field_data: { Args: { p_trial_id: string }; Returns: boolean }
       can_review_trial: { Args: { p_trial_id: string }; Returns: boolean }
       current_app_role: {

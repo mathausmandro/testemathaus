@@ -3,7 +3,15 @@ import { expect, test } from "@playwright/test";
 
 // Rotas existentes em src/app/(app) e (auth) que exigem sessão. tests/security/rotas-protegidas.test.ts
 // confere que esta lista cobre todas as páginas protegidas.
-const ROTAS_LOGADAS = ["/inicio", "/admin", "/aguardando"];
+const ROTAS_LOGADAS = [
+  "/inicio",
+  "/admin",
+  "/admin/usuarios",
+  "/admin/usuarios/x",
+  "/admin/ensaios",
+  "/admin/ensaios/x",
+  "/aguardando",
+];
 
 for (const rota of ROTAS_LOGADAS) {
   test(`sem sessão, ${rota} redireciona para o login`, async ({ page, request }) => {

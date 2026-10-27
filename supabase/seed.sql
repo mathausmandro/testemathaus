@@ -31,6 +31,11 @@ insert into auth.users (
    '', '', '', '', now(), now()),
   ('00000000-0000-0000-0000-000000000000', '10000000-0000-4000-8000-000000000004', 'authenticated', 'authenticated',
    'aguardando@exemplo.test', extensions.crypt('senha-teste-local', extensions.gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Aguardando Liberação"}',
+   '', '', '', '', now(), now()),
+  -- Tarefa 015: pessoa sem perfil reservada ao e2e da administração (tests/e2e/admin.spec.ts), para não
+  -- interferir no e2e de "aguardando@" (tests/e2e/perfis.spec.ts). Id 6: o pgTAP 010 usa 1 a 5 nas fixtures.
+  ('00000000-0000-0000-0000-000000000000', '10000000-0000-4000-8000-000000000006', 'authenticated', 'authenticated',
+   'liberacao@exemplo.test', extensions.crypt('senha-teste-local', extensions.gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Pessoa a Liberar"}',
    '', '', '', '', now(), now());
 
 -- Identidade do provedor email (o GoTrue usa para o login por senha).

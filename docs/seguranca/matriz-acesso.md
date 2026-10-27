@@ -62,7 +62,7 @@ Registros de campo não são excluídos: são anulados por UPDATE com motivo. A 
 | notification_log | SELECT | ✅ / ✅ | ✅ / ∅ | ✅ / ∅ | ✅ / ∅ |
 | notification_log | INSERT, UPDATE, DELETE | ⛔ | ⛔ | ⛔ | ⛔ |
 
-Mudança de `role` em profiles (só coordination, nunca a própria) está em `005_perfis_e_ensaios.test.sql`. notification_log é gravado só pelo serviço (service_role, Fase 4).
+Mudança de `role` em profiles (só coordination, nunca a própria) está em `005_perfis_e_ensaios.test.sql`. As RPCs de administração (`admin_set_user_role`, `admin_add_trial_member`, `admin_remove_trial_member`, SECURITY INVOKER, motivo obrigatório) e a garantia de ao menos uma coordination estão em `015_administracao_perfis.test.sql`. notification_log é gravado só pelo serviço (service_role, Fase 4).
 
 ## Regras transversais verificadas
 

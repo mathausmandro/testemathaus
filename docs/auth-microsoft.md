@@ -96,6 +96,29 @@ host.docker.internal) e `VERCEL_ENV` diferente de `preview`/`production` e `APP_
   `https://<endereço-do-app>/auth/callback`. Na Vercel: `AUTH_MICROSOFT_ENABLED=true`,
   `SITE_URL` e `APP_ENV=production` (produção). `AUTH_LOCAL_PASSWORD_LOGIN` nunca é definida lá.
 
+## Primeira coordenação (bootstrap)
+
+A tela de administração (tarefa 015) só abre para quem já é coordination. A primeira pessoa precisa ser
+liberada direto no banco, uma única vez por ambiente, sem nenhum e-mail ou credencial no repositório:
+
+1. A pessoa entra uma vez pelo login Microsoft (o perfil é criado sem papel e ela cai em "Aguardando liberação").
+2. Quem administra o projeto no painel do Supabase abre o SQL Editor (roda como `postgres`, operação de sistema)
+   e executa, numa transação, trocando o e-mail:
+
+   ```sql
+   begin;
+   select set_config('app.change_reason', 'Bootstrap: primeira coordenação', true);
+   update public.profiles set role = 'coordination' where email = '<e-mail da pessoa>';
+   commit;
+   ```
+
+3. A mudança fica em `change_history` (autor nulo = sistema, com o motivo acima). A partir daí, toda
+   atribuição de perfil é feita pela tela `/admin/usuarios`.
+
+Garantias do banco: ninguém altera o próprio perfil (005) e o sistema nunca fica sem coordination, nem por
+SQL direto nem por duas coordenações se rebaixando ao mesmo tempo (gatilho `zz_protect_last_coordination`, 015).
+Recomenda-se ter ao menos duas pessoas na coordenação (pendente de confirmação do Mathaus).
+
 ## Validação pendente (parceiro, com Docker)
 
 1. `npx supabase db reset`, app com `.env.local` do `scripts/setup-local.mjs` e `AUTH_LOCAL_PASSWORD_LOGIN=true`.
