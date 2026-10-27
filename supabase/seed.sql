@@ -41,3 +41,24 @@ insert into public.trials (id, code, contractor, crop, location, design, planned
 insert into public.trial_members (trial_id, user_id) values
   ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000002'),
   ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000003');
+
+-- ---------------------------------------------------------------------------
+-- Tarefa 006: protocolo fictício do ENS-TESTE-01 (DBC, 2 tratamentos x 2 blocos = 4 parcelas)
+-- A distribuição dos tratamentos abaixo é só ilustrativa; a casualização real vem na Fase 2.
+-- ---------------------------------------------------------------------------
+insert into public.treatments (id, trial_id, number, name, product, active_ingredient, dose, dose_unit, formulation, timing) values
+  ('30000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000001', 1, 'Testemunha', null, null, null, null, null, null),
+  ('30000000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000001', 2, 'Produto Fictício A', 'Produto Fictício A', 'Ingrediente Fictício', 1.5, 'L/ha', 'SC', 'Pré-emergência');
+
+insert into public.plots (id, trial_id, number, block, treatment_id, grid_row, grid_column) values
+  ('31000000-0000-4000-8000-000000000101', '20000000-0000-4000-8000-000000000001', 101, 1, '30000000-0000-4000-8000-000000000002', 1, 1),
+  ('31000000-0000-4000-8000-000000000102', '20000000-0000-4000-8000-000000000001', 102, 1, '30000000-0000-4000-8000-000000000001', 1, 2),
+  ('31000000-0000-4000-8000-000000000201', '20000000-0000-4000-8000-000000000001', 201, 2, '30000000-0000-4000-8000-000000000001', 2, 1),
+  ('31000000-0000-4000-8000-000000000202', '20000000-0000-4000-8000-000000000001', 202, 2, '30000000-0000-4000-8000-000000000002', 2, 2);
+
+insert into public.assessment_variables (id, trial_id, name, unit, method, scale, min_value, max_value) values
+  ('32000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000001', 'Variável fictícia', 'cm', 'Método fictício', null, 0, 300);
+
+insert into public.planned_assessments (id, trial_id, variable_id, days_after, reference_event, planned_date, responsible_id) values
+  ('33000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000001', '32000000-0000-4000-8000-000000000001',
+   14, 'planting', '2026-11-15', '10000000-0000-4000-8000-000000000002');

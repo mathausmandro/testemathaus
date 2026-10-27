@@ -19,6 +19,252 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessment_variables: {
+        Row: {
+          created_at: string
+          id: string
+          max_value: number | null
+          method: string | null
+          min_value: number | null
+          name: string
+          scale: string | null
+          trial_id: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          max_value?: number | null
+          method?: string | null
+          min_value?: number | null
+          name: string
+          scale?: string | null
+          trial_id: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          max_value?: number | null
+          method?: string | null
+          min_value?: number | null
+          name?: string
+          scale?: string | null
+          trial_id?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_variables_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      factor_levels: {
+        Row: {
+          created_at: string
+          factor_id: string
+          id: string
+          name: string
+          position: number | null
+          trial_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          factor_id: string
+          id?: string
+          name: string
+          position?: number | null
+          trial_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          factor_id?: string
+          id?: string
+          name?: string
+          position?: number | null
+          trial_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factor_levels_factor_fkey"
+            columns: ["factor_id", "trial_id"]
+            isOneToOne: false
+            referencedRelation: "factors"
+            referencedColumns: ["id", "trial_id"]
+          },
+          {
+            foreignKeyName: "factor_levels_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      factors: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          position: number | null
+          trial_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          position?: number | null
+          trial_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number | null
+          trial_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factors_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planned_assessments: {
+        Row: {
+          created_at: string
+          days_after: number | null
+          id: string
+          planned_date: string | null
+          reference_event: string | null
+          responsible_id: string | null
+          trial_id: string
+          updated_at: string
+          variable_id: string
+        }
+        Insert: {
+          created_at?: string
+          days_after?: number | null
+          id?: string
+          planned_date?: string | null
+          reference_event?: string | null
+          responsible_id?: string | null
+          trial_id: string
+          updated_at?: string
+          variable_id: string
+        }
+        Update: {
+          created_at?: string
+          days_after?: number | null
+          id?: string
+          planned_date?: string | null
+          reference_event?: string | null
+          responsible_id?: string | null
+          trial_id?: string
+          updated_at?: string
+          variable_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planned_assessments_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planned_assessments_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planned_assessments_variable_fkey"
+            columns: ["variable_id", "trial_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_variables"
+            referencedColumns: ["id", "trial_id"]
+          },
+        ]
+      }
+      plots: {
+        Row: {
+          block: number | null
+          created_at: string
+          grid_column: number | null
+          grid_row: number | null
+          id: string
+          main_plot_id: string | null
+          number: number
+          treatment_id: string | null
+          trial_id: string
+          updated_at: string
+        }
+        Insert: {
+          block?: number | null
+          created_at?: string
+          grid_column?: number | null
+          grid_row?: number | null
+          id?: string
+          main_plot_id?: string | null
+          number: number
+          treatment_id?: string | null
+          trial_id: string
+          updated_at?: string
+        }
+        Update: {
+          block?: number | null
+          created_at?: string
+          grid_column?: number | null
+          grid_row?: number | null
+          id?: string
+          main_plot_id?: string | null
+          number?: number
+          treatment_id?: string | null
+          trial_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plots_main_plot_fkey"
+            columns: ["main_plot_id", "trial_id"]
+            isOneToOne: false
+            referencedRelation: "plots"
+            referencedColumns: ["id", "trial_id"]
+          },
+          {
+            foreignKeyName: "plots_treatment_fkey"
+            columns: ["treatment_id", "trial_id"]
+            isOneToOne: false
+            referencedRelation: "treatments"
+            referencedColumns: ["id", "trial_id"]
+          },
+          {
+            foreignKeyName: "plots_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -45,6 +291,108 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      treatment_factor_levels: {
+        Row: {
+          created_at: string
+          factor_level_id: string
+          id: string
+          treatment_id: string
+          trial_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          factor_level_id: string
+          id?: string
+          treatment_id: string
+          trial_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          factor_level_id?: string
+          id?: string
+          treatment_id?: string
+          trial_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treatment_factor_levels_level_fkey"
+            columns: ["factor_level_id", "trial_id"]
+            isOneToOne: false
+            referencedRelation: "factor_levels"
+            referencedColumns: ["id", "trial_id"]
+          },
+          {
+            foreignKeyName: "treatment_factor_levels_treatment_fkey"
+            columns: ["treatment_id", "trial_id"]
+            isOneToOne: false
+            referencedRelation: "treatments"
+            referencedColumns: ["id", "trial_id"]
+          },
+          {
+            foreignKeyName: "treatment_factor_levels_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      treatments: {
+        Row: {
+          active_ingredient: string | null
+          created_at: string
+          dose: number | null
+          dose_unit: string | null
+          formulation: string | null
+          id: string
+          name: string
+          number: number
+          product: string | null
+          timing: string | null
+          trial_id: string
+          updated_at: string
+        }
+        Insert: {
+          active_ingredient?: string | null
+          created_at?: string
+          dose?: number | null
+          dose_unit?: string | null
+          formulation?: string | null
+          id?: string
+          name: string
+          number: number
+          product?: string | null
+          timing?: string | null
+          trial_id: string
+          updated_at?: string
+        }
+        Update: {
+          active_ingredient?: string | null
+          created_at?: string
+          dose?: number | null
+          dose_unit?: string | null
+          formulation?: string | null
+          id?: string
+          name?: string
+          number?: number
+          product?: string | null
+          timing?: string | null
+          trial_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treatments_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trials"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trial_members: {
         Row: {

@@ -1,5 +1,5 @@
 # 006 - Migration: estrutura do protocolo (fatores, tratamentos, parcelas, variáveis, avaliações)
-Fase: 1 | Status: a fazer | Modelo do desenvolvedor: opus
+Fase: 1 | Status: pronta para validação (requer Docker/Supabase) | Modelo do desenvolvedor: opus
 
 ## Objetivo
 Criar as tabelas que descrevem o protocolo do ensaio, com RLS herdando a visibilidade por trial_members, para que as fases seguintes só gerem dados sobre elas.
@@ -41,3 +41,32 @@ pgTAP: matriz por perfil e por pertencimento ao ensaio em cada tabela; restriç�
 - Quantidade típica de parcelas e variáveis por ensaio (para dimensionar índices e testes de volume).
 
 ## Entrega (preenchido pelo desenvolvedor)
+
+Não executado: requer Docker/Supabase local (orientação de 27/10/2026). Validação só estática (parser do Postgres 17 no Vitest).
+
+### Arquivos alterados
+- Novos: `supabase/migrations/20261027170100_protocolo.sql`, `supabase/tests/006_protocolo.test.sql`.
+- Alterados: `supabase/seed.sql` (ENS-TESTE-01: 2 tratamentos, 4 parcelas em 2 blocos, 1 variável, 1 avaliação prevista; distribuição ilustrativa, não é casualização), `src/lib/data/database.types.ts`.
+
+### O que foi feito
+- Tabelas `factors`, `factor_levels`, `treatments`, `treatment_factor_levels` (vínculo tratamento x nível de fator), `plots`, `assessment_variables`, `planned_assessments`, todas com uuid, `trial_id`, `created_at`/`updated_at` timestamptz e gatilho de updated_at.
+- Integridade por chave estrangeira composta `(id, trial_id)`: parcela só aponta tratamento e parcela principal do mesmo ensaio; nível, vínculo e avaliação prevista idem. CHECK `min_value <= max_value`; número de tratamento e de parcela únicos no ensaio; `days_after` e `reference_event` (`planting`/`application`) juntos ou ambos nulos.
+- RLS em todas: leitura `has_trial_access(trial_id)` (coordination ou membro com papel); inserção, atualização e exclusão só coordination. anon sem privilégio; truncate revogado de authenticated. Políticas escritas explicitamente (sem bloco DO) para revisão e para o teste estático.
+- Índices em `trial_id` (ou cobertos pelo único `(trial_id, number|name)`) e nas chaves de junção (`treatment_id`, `main_plot_id`, `variable_id`, `responsible_id`, `factor_level_id`).
+- Exclusão de parcela com registro de campo: será bloqueada na 007 pela FK sem cascade de `field_records`.
+
+### Como testar
+- Aqui: `npm test` (sintaxe, RLS em toda tabela, tipos x migrations).
+- Com Docker (pendente): `npx supabase db reset`, `npx supabase test db` (arquivo `006_protocolo.test.sql`: RLS e timestamptz, integridade, matriz coordination/field/home_office/sem perfil/anon x leitura/inserção/atualização/exclusão por ensaio atribuído e alheio).
+- Performance (pendente): `explain analyze select * from plots where trial_id = ...` como field.
+
+### Desvios e observações
+- Criada a tabela de ligação `treatment_factor_levels` (não listada em CONTEXTO.md) para o "vínculo com níveis de fator" do escopo.
+- Dose como `numeric` + `dose_unit` texto; época (`timing`), escala (`scale`), método e formulação como texto livre. Um tratamento tem um só produto nesta modelagem.
+- `planned_date` é `date` (data prevista, só dia), conforme permitido no critério de aceite.
+- Coordenadas do croqui como linha/coluna da grade (`grid_row`, `grid_column`).
+- Não há regra de "um nível por fator em cada tratamento" nem de responsável ser membro do ensaio; ficam para a Fase 2 se o Mathaus confirmar.
+
+### Dúvidas para o Mathaus (acréscimo do desenvolvedor)
+- Um tratamento pode ser mistura de vários produtos (tanque)? Se sim, produtos viram tabela própria.
+- A avaliação "dias após aplicação" refere-se a qual aplicação (primeira, cada uma)? Hoje só se guarda o evento de referência.
