@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Plataforma de Ensaios",
-  description: "Plataforma para automatizar ensaios agronÃ´micos, da casualizaÃ§Ã£o ao relatÃ³rio tÃ©cnico.",
+  description: "Plataforma para automatizar ensaios agronômicos, da casualização ao relatório técnico.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

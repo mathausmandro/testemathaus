@@ -1,5 +1,5 @@
 # 001 - Preparação do ambiente e esqueleto do projeto
-Fase: 1 | Status: em QA | Modelo do desenvolvedor: sonnet
+Fase: 1 | Status: pronta (Docker pendente pela TI) | Modelo do desenvolvedor: sonnet
 
 ## Objetivo
 Deixar a máquina pronta para desenvolver (Node.js, Git, Docker Desktop, Supabase CLI) e criar o esqueleto do projeto Next.js 16 com as ferramentas de teste instaladas e os scripts npm padronizados, para que todas as tarefas seguintes partam de uma base que roda.
@@ -24,7 +24,7 @@ package.json, tsconfig.json, eslint config, next.config.ts, tailwind config, vit
 - [ ] node -v, git --version, docker --version e supabase --version respondem; versões registradas em docs/ambiente.md.
 - [ ] npm ci seguido de npm run build termina sem erro.
 - [ ] npm run lint, typecheck, test, test:e2e, test:perf e test:security existem e passam no esqueleto.
-- [ ] A varredura de gitleaks passa e falha de propósito quando um segredo falso é colocado em arquivo de teste (verificado e depois removido).
+- [ ] A varredura de segredos (secretlint no local; gitleaks com .gitleaks.toml fica para o CI da tarefa 002, decisão do orquestrador em 27/10/2026 porque o binário não foi autorizado na máquina) passa e falha de propósito quando um segredo falso é colocado em arquivo de teste (verificado e depois removido).
 - [ ] .env.local e qualquer .env com valores estão no .gitignore; .env.example só tem nomes.
 - [ ] Nenhuma variável NEXT_PUBLIC contém segredo; SUPABASE_SECRET_KEY não tem prefixo NEXT_PUBLIC.
 - [ ] Repositório git inicializado com pelo menos um commit limpo.
@@ -66,6 +66,9 @@ npm ci; npx playwright install chromium; depois: npm run lint, npm run typecheck
 5. @types/node foi para ^24 (exigência de peer do Vitest 5). Fontes do Google removidas do layout (fonte do sistema), para o build não depender de rede.
 6. Houve falta de espaço em disco (ENOSPC) durante a instalação; o cache do npm foi limpo. Recomendado manter 2 GB livres.
 7. O create-next-app 16.4.3 gerou next.config.ts com cacheComponents e partialPrefetching ligados; foram mantidos como gerados.
+
+### Correções
+- Correção A2: src/app/layout.tsx, meta description com mojibake ("agronÃ´micos", "casualizaÃ§Ã£o", "relatÃ³rio tÃ©cnico") corrigida para os acentos corretos, texto exato do QA, salvo em UTF-8 sem BOM. Busca no repositório (src, tests, docs, README; excluindo node_modules) por "Ã", "Â" e "â€" não encontrou outros casos, exceto a própria descrição do achado em docs/qa/001.md. Lint, typecheck e test passam.
 
 ### Pendências
 - Docker Desktop: não instalado, depende da TI (critério "docker --version" fica pendente; registrado em docs/ambiente.md).

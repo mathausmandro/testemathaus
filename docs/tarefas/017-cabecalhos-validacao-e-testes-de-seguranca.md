@@ -31,6 +31,10 @@ Unitários: utilitário de validação. e2e: sem erros de CSP nas telas existent
 - Depende de 001, 002 e, para varrer rotas reais, de 014. Pode começar cedo e ser completada após 016.
 - Risco: CSP muito estrito quebra Next.js/Serwist em fases futuras; documentar como evoluir.
 
+## Herdado da tarefa 001
+- Segurança S2: CSP, HSTS e frame-ancestors faltam no next.config.ts (docs/seguranca/001.md).
+- Segurança S6: dados de ensaio nunca em `use cache` compartilhado (cacheComponents ligado); acrescentar regra à skill nextjs-app-router.
+
 ## Dúvidas para o Mathaus
 - Nenhuma. Os domínios definitivos (Vercel e Supabase) serão necessários na tarefa 018 para fechar o CSP de produção.
 

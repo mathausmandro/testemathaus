@@ -6,7 +6,7 @@ Criar um único comando local e um fluxo de CI que rodem, em ordem, lint, tipos,
 
 ## Escopo
 Inclui:
-- Script local npm run verify (ou equivalente) que executa as etapas na ordem: gitleaks, npm audit, lint, typecheck, test, pgTAP (supabase test db), build, test:e2e, test:perf (Lighthouse CI). Cada etapa mostra claramente passou ou falhou e o comando termina com código diferente de zero se qualquer uma falhar.
+- Script local npm run verify (ou equivalente) que executa as etapas na ordem: varredura de segredos (secretlint no local, gitleaks no CI), npm audit, lint, typecheck, test, pgTAP (supabase test db), build, test:e2e, test:perf (Lighthouse CI). Cada etapa mostra claramente passou ou falhou e o comando termina com código diferente de zero se qualquer uma falhar.
 - Etapa de pgTAP que se comporta de forma explícita enquanto o Supabase local não existe: avisa "ignorada: Supabase local ausente" localmente, mas é obrigatória no CI depois da tarefa 004 (ficar documentado e com teste do comportamento).
 - Workflow do GitHub Actions em .github/workflows/ci.yml com as mesmas etapas, cache do npm, Supabase CLI e Docker para pgTAP e e2e, publicação dos relatórios (Playwright, Lighthouse) como artefatos.
 - Limiares de performance iniciais (Lighthouse: performance, acessibilidade, boas práticas) definidos em lighthouserc e registrados em docs/qualidade.md; limiar de npm audit: falhar em vulnerabilidade alta ou crítica.
@@ -33,6 +33,13 @@ Unitários: teste do script verify (ordem e código de saída), se for script pr
 - Depende da 001. Etapas pgTAP, e2e autenticado e Lighthouse em páginas logadas só ganham conteúdo nas tarefas seguintes.
 - Runners do GitHub Actions exigem repositório no GitHub; sem ele, vale só a versão local até o Mathaus decidir.
 - Lighthouse em CI é variável; usar várias execuções e limiares realistas para não gerar falso negativo.
+
+## Herdado da tarefa 001
+- Performance: lighthouserc.json com asserções em error (performance >= 0,85, LCP <= 2500 ms, teto de JS inicial 200 KB), 3 execuções por URL. O esqueleto já usa 171 KB de JS inicial (docs/performance/001.md).
+- Segurança S1: isolar @lhci/cli em pacote próprio com lockfile e npm ci --ignore-scripts, ou rodar só em job de CI sem segredos.
+- Segurança S3 e S4: não excluir .env.example do secretlint e do gitleaks; atualizar a allowlist do .gitleaks.toml para o formato atual e não excluir package-lock.json.
+- Segurança S5: test:security deve rodar os testes de tests/security.
+- Segurança S7: avaliar o postinstall do pacote supabase (download de binário) no CI.
 
 ## Dúvidas para o Mathaus
 - O CI será no GitHub Actions? (Depende do repositório remoto.)
