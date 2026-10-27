@@ -58,3 +58,21 @@ describe("workflow de CI", () => {
     expect(raw).not.toMatch(/SUPABASE_SECRET_KEY/);
   });
 });
+
+describe("workflow de CI: Supabase local", () => {
+  const idx = (re: RegExp) => steps.findIndex((s) => re.test(String(s.name ?? "")));
+
+  it("inicia o Supabase local sem condição e antes do verify", () => {
+    const start = steps.find((s) => s.run === "npx supabase start");
+    expect(start).toBeTruthy();
+    expect(start?.if).toBeUndefined();
+    expect(idx(/Iniciar Supabase/)).toBeLessThan(idx(/Verificar/));
+  });
+
+  it("exporta só NEXT_PUBLIC_* do status do Supabase, antes do verify", () => {
+    const exp = steps.find((s) => s.run === "node scripts/setup-local.mjs --github-env");
+    expect(exp).toBeTruthy();
+    expect(idx(/Exportar variáveis públicas/)).toBeGreaterThan(idx(/Iniciar Supabase/));
+    expect(idx(/Exportar variáveis públicas/)).toBeLessThan(idx(/Verificar/));
+  });
+});

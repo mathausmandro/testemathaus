@@ -22,9 +22,9 @@ Os scripts avulsos continuam: `test:e2e` (faz o próprio build), `test:perf`, `t
 
 ## pgTAP: regra de obrigatoriedade
 
-- Local, sem Supabase local (sem Docker, hoje): a etapa mostra "ignorada: Supabase local ausente" com aviso e não reprova.
-- No CI (`CI=true`): a ausência do Supabase local **reprova**. A etapa não pode ser ignorada. O workflow inicia o Supabase local quando `supabase/config.toml` existir; esse arquivo nasce na tarefa 004. Até lá, o CI fica vermelho nesta etapa de propósito (o workflow ainda nem roda sem repositório remoto).
-- A partir da tarefa 004, ninguém pode marcar esta etapa como opcional, nem remover a falha por ausência.
+- Local, com `config.toml` mas sem o Supabase rodando (sem Docker, hoje), ou sem `config.toml`: a etapa mostra "ignorada: Supabase local ausente" com aviso e não reprova. Não executado: o pgTAP real requer Docker/Supabase local.
+- No CI (`CI=true`): a ausência do Supabase local (ou de `supabase/config.toml`) **reprova**. A etapa não pode ser ignorada. O workflow roda `supabase start` sem condição e exporta as `NEXT_PUBLIC_*` com `node scripts/setup-local.mjs --github-env` (só chaves públicas do Supabase local de teste).
+- Desde a tarefa 004, `supabase/config.toml` existe. Sem Docker, localmente a etapa fica "ignorada: Supabase local ausente"; ninguém pode marcar esta etapa como opcional no CI, nem remover a falha por ausência.
 - Testado em `tests/unit/verify.test.ts`.
 
 ## Limiares de performance (lighthouserc.json)

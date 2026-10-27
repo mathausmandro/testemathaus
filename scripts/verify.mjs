@@ -2,6 +2,7 @@
 // Etapas em ordem fixa; cada uma mostra PASSOU, FALHOU ou IGNORADA; saída != 0 se alguma falhar.
 // O executor é injetável para testar a ordem e o código de saída sem rodar as etapas de verdade.
 import { spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const isWin = process.platform === "win32";
@@ -33,6 +34,11 @@ export function realExec(step) {
   return r.status ?? 1;
 }
 
+/** Configuração versionada do Supabase local (criada na tarefa 004). */
+export function realConfigExists() {
+  return existsSync("supabase/config.toml");
+}
+
 /** Supabase local disponível? `supabase status` só passa com a pilha local em execução. */
 export function realSupabaseAvailable() {
   const r = spawnSync(npx, ["supabase", "status"], { stdio: "ignore", shell: isWin });
@@ -42,12 +48,12 @@ export function realSupabaseAvailable() {
 /**
  * Roda as etapas em ordem; para na primeira falha (etapas seguintes ficam "NÃO EXECUTADA").
  * @param {any[]} steps
- * @param {{ exec?: (s: any) => number, supabaseAvailable?: () => boolean, env?: Record<string, string | undefined>, log?: (m: string) => void, now?: () => number }} [deps]
+ * @param {{ exec?: (s: any) => number, configExists?: () => boolean, supabaseAvailable?: () => boolean, env?: Record<string, string | undefined>, log?: (m: string) => void, now?: () => number }} [deps]
  * @returns {{ code: number, results: { id: string, name: string, status: string, ms: number, note?: string }[] }}
  */
 export function runSteps(
   steps,
-  { exec = realExec, supabaseAvailable = realSupabaseAvailable, env = process.env, log = console.log, now = Date.now } = {},
+  { exec = realExec, configExists = realConfigExists, supabaseAvailable = realSupabaseAvailable, env = process.env, log = console.log, now = Date.now } = {},
 ) {
   const results = [];
   let failed = false;
@@ -60,10 +66,15 @@ export function runSteps(
     const t0 = now();
     let status;
     let note;
-    if (step.needsSupabase && !supabaseAvailable()) {
+    // Sem config.toml não há o que consultar. Com config.toml mas sem a pilha rodando (sem Docker),
+    // localmente a etapa é ignorada com aviso; no CI (CI=true) reprova.
+    const semConfig = step.needsSupabase && !configExists();
+    if (step.needsSupabase && (semConfig || !supabaseAvailable())) {
       if (isCI(env)) {
         status = "FALHOU";
-        note = "Supabase local ausente; no CI o pgTAP é obrigatório e não pode ser ignorado";
+        note = semConfig
+          ? "supabase/config.toml ausente; no CI o pgTAP é obrigatório e não pode ser ignorado"
+          : "Supabase local ausente; no CI o pgTAP é obrigatório e não pode ser ignorado";
         log(`FALHOU: ${note}`);
       } else {
         status = "IGNORADA";

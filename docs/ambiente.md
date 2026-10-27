@@ -76,3 +76,14 @@ docker compose --profile prod up --build   # imagem final, http://localhost:3000
 - Verificação da imagem (a fazer com Docker): `docker compose --profile prod build`, `docker run --rm <imagem> whoami` (esperado: node), `docker history --no-trunc <imagem>` e `docker run --rm <imagem> sh -c "ls -a; env"` sem `.env` nem `SUPABASE_SECRET_KEY`.
 - Tamanho da imagem final e tempo de build: pendentes (registrar aqui após o primeiro build).
 - `next start` (usado pelo e2e e pelo Lighthouse) continua funcionando com `output: "standalone"`; o servidor da imagem é `node server.js`.
+
+## Supabase local e variáveis (tarefa 004)
+
+Não executado: `supabase start`, `db reset` e `status` requerem Docker/Supabase local. Escrito e validado estaticamente; checklist em docs/tarefas/ORIENTACAO-SEM-DOCKER.md.
+
+- `supabase/config.toml` criado com `npx supabase init` (padrões da CLI 2.122: API 54321, banco 54322, Studio 54323, e-mail de desenvolvimento 54324). Project id `plataforma-ensaios`. Sem segredos; só referências `env(...)` desativadas.
+- `supabase/seed.sql` mínimo (`select 1;`), sem dado pessoal. Dados fictícios entram com as migrations.
+- `node scripts/setup-local.mjs` (com o Supabase local rodando) gera `.env.local` mapeando `API_URL` e a chave publicável para `NEXT_PUBLIC_*` e a chave secreta local para `SUPABASE_SECRET_KEY`. Não imprime valores, não sobrescreve sem `--force`. `ALLOWED_EMAIL_DOMAIN` fica em branco (valor pendente).
+- `src/lib/env.ts` (variáveis públicas, zod, seguro para cliente) e `src/lib/env.server.ts` (inclui `SUPABASE_SECRET_KEY`, protegido por `import "server-only"`). `getPublicEnv()` e `getServerEnv()` falham com `EnvError` em português se faltar variável ou estiver vazia. Ainda não são chamadas na inicialização do app (nenhum consumidor até as tarefas 011 e 012); quando o primeiro consumidor existir, a falha ocorre no primeiro uso.
+- Portas ocupadas: ajuste em `supabase/config.toml` e use `host.docker.internal` conforme a seção do Docker.
+- Tempo de `supabase start`: pendente (registrar aqui na validação).

@@ -1,5 +1,5 @@
 # 004 - Supabase local e variáveis de ambiente
-Fase: 1 | Status: a fazer | Modelo do desenvolvedor: sonnet
+Fase: 1 | Status: pronta para validação (requer Docker/Supabase) | Modelo do desenvolvedor: sonnet
 
 ## Objetivo
 Ter o banco local rodando com supabase start, configuração versionada, variáveis de ambiente documentadas e o app capaz de ler a URL e a chave publicável do Supabase local.
@@ -37,3 +37,18 @@ Unitários: validação de env (completa, faltando, valor vazio). e2e: fumaça. 
 - Nenhuma.
 
 ## Entrega (preenchido pelo desenvolvedor)
+
+Não executado: requer Docker/Supabase local (orientação de 27/10/2026). `supabase init` rodou (não precisa de Docker).
+
+### Arquivos alterados
+- Novos: `supabase/config.toml`, `supabase/.gitignore`, `supabase/seed.sql`, `scripts/setup-local.mjs`, `src/lib/env.ts`, `src/lib/env.server.ts`, `tests/stubs/server-only.ts`, `tests/unit/env.test.ts`, `tests/unit/setup-local.test.ts`.
+- Alterados: `scripts/verify.mjs` (config.toml; ignorada local, reprova no CI), `tests/unit/verify.test.ts`, `tests/unit/ci-workflow.test.ts`, `.github/workflows/ci.yml` (supabase start sem condição + exportação das NEXT_PUBLIC_*), `.env.example` (comentário; só nomes), `vitest.config.mts` (alias de server-only), `package.json` (zod, server-only), `docs/ambiente.md`, `docs/qualidade.md`, INDICE e PLANO.
+
+### Como testar
+- Aqui: `npm test` (env, setup-local, verify, workflow), `npm run verify` (pgTAP aparece ignorada).
+- Com Docker (pendente): `npx supabase start`, `npx supabase db reset`, `node scripts/setup-local.mjs`, `git status` sem `.env.local`, `npx supabase status -o env` (conferir que os nomes API_URL/PUBLISHABLE_KEY/SECRET_KEY batem com o mapeamento; há fallback para ANON_KEY/SERVICE_ROLE_KEY), `npx supabase test db`.
+
+### Desvios e observações
+- A validação de env não roda na inicialização do app: com `next start` sem `.env.local` o e2e e o Lighthouse quebrariam, e ainda não há consumidor. `getPublicEnv()`/`getServerEnv()` falham com mensagem em português no primeiro uso; ligar na inicialização (instrumentation) fica para a tarefa 011/012. Critério "app falha na inicialização" fica parcial.
+- Busca por SUPABASE_SECRET_KEY no bundle do cliente: coberta por teste estático (só `env.server.ts` a cita; `server-only`); varredura do bundle real pendente até haver consumidor.
+- Acesso por perfil: não se aplica (sem tabelas). pgTAP: suíte vazia não executada (requer Docker). Tempo do `supabase start`: não medido.

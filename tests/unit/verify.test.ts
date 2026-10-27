@@ -1,9 +1,10 @@
+import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { STEPS, runSteps } from "../../scripts/verify.mjs";
 
 type Step = { id: string };
 const quiet = () => {};
-const run = (opts: Record<string, unknown>) => runSteps(STEPS, { log: quiet, ...opts });
+const run = (opts: Record<string, unknown>) => runSteps(STEPS, { log: quiet, configExists: () => true, ...opts });
 
 describe("verify: ordem das etapas", () => {
   it("segue a ordem oficial", () => {
@@ -44,6 +45,7 @@ describe("verify: pgTAP sem Supabase local", () => {
     const calls: string[] = [];
     const { code, results } = runSteps(STEPS, {
       log: (m: string) => logs.push(m),
+      configExists: () => true,
       exec: (s: Step) => (calls.push(s.id), 0),
       supabaseAvailable: () => false,
       env: {},
@@ -75,5 +77,54 @@ describe("verify: pgTAP sem Supabase local", () => {
     });
     expect(code).toBe(1);
     expect(results.find((r) => r.id === "pgtap")?.status).toBe("FALHOU");
+  });
+});
+
+describe("verify: config.toml do Supabase", () => {
+  it("com config.toml e Supabase parado, local ignora e consulta o status", () => {
+    let consultas = 0;
+    const { code, results } = run({
+      exec: () => 0,
+      supabaseAvailable: () => (consultas++, false),
+      env: {},
+    });
+    expect(code).toBe(0);
+    expect(consultas).toBe(1);
+    expect(results.find((r) => r.id === "pgtap")?.note).toBe("ignorada: Supabase local ausente");
+  });
+
+  it("sem config.toml, local ignora sem consultar o status", () => {
+    let consultas = 0;
+    const { code, results } = run({
+      exec: () => 0,
+      configExists: () => false,
+      supabaseAvailable: () => (consultas++, true),
+      env: {},
+    });
+    expect(code).toBe(0);
+    expect(consultas).toBe(0);
+    expect(results.find((r) => r.id === "pgtap")?.status).toBe("IGNORADA");
+  });
+
+  it("no CI, config.toml ausente reprova com mensagem própria", () => {
+    const { code, results } = run({
+      exec: () => 0,
+      configExists: () => false,
+      supabaseAvailable: () => true,
+      env: { CI: "true" },
+    });
+    expect(code).toBe(1);
+    expect(results.find((r) => r.id === "pgtap")?.note).toContain("config.toml ausente");
+  });
+
+  it("no CI, com config.toml e Supabase parado, reprova", () => {
+    const { code, results } = run({ exec: () => 0, supabaseAvailable: () => false, env: { CI: "1" } });
+    expect(code).toBe(1);
+    expect(results.find((r) => r.id === "pgtap")?.status).toBe("FALHOU");
+  });
+
+  it("o repositório versiona supabase/config.toml", () => {
+    expect(existsSync("supabase/config.toml")).toBe(true);
+    expect(existsSync("supabase/seed.sql")).toBe(true);
   });
 });

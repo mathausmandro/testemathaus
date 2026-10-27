@@ -62,11 +62,15 @@ jobs:
       - name: Instalar Chromium do Playwright
         run: npx playwright install --with-deps chromium
 
-      # Supabase local (Docker do runner) para pgTAP e e2e. Valores são os de teste do próprio Supabase local.
-      # Enquanto supabase/config.toml não existir (tarefa 004), a etapa pgTAP do verify falha de propósito no CI.
+      # Supabase local (Docker do runner) para pgTAP e e2e. Sem condição: o config.toml é obrigatório
+      # e a etapa pgTAP do verify reprova no CI se o Supabase local não estiver de pé.
       - name: Iniciar Supabase local
-        if: hashFiles('supabase/config.toml') != ''
         run: npx supabase start
+
+      # Mapeia as chaves do `supabase status` para NEXT_PUBLIC_* (só as públicas; nada de segredo
+      # é exportado). Valores são os de teste do Supabase local, descartados com o runner.
+      - name: Exportar variáveis públicas do Supabase local
+        run: node scripts/setup-local.mjs --github-env
 
       - name: Verificar (npm run verify)
         run: npm run verify
