@@ -1,5 +1,5 @@
 # 002 - Pipeline de qualidade, segurança e performance
-Fase: 1 | Status: em QA | Modelo do desenvolvedor: sonnet
+Fase: 1 | Status: pronta (CI real pendente do repositório remoto) | Modelo do desenvolvedor: sonnet
 
 ## Objetivo
 Criar um único comando local e um fluxo de CI que rodem, em ordem, lint, tipos, testes unitários, pgTAP, e2e, Lighthouse, npm audit e gitleaks, de modo que qualidade, segurança e performance sejam verificadas desde a Fase 1 e cada tarefa seguinte apenas acrescente seus testes.

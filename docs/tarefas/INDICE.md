@@ -6,7 +6,7 @@ Fluxo de cada tarefa: analista, desenvolvedor, qa, performance, seguranca. Statu
 
 | Nº | Nome | Fase | Status | Modelo | Depende de | QA | Performance | Segurança |
 | 001 | [Preparação do ambiente e esqueleto](001-ambiente-e-esqueleto.md) | 1 | pronta (Docker pendente) | sonnet | nenhuma | [aprovado](../qa/001.md) | [aprovado](../performance/001.md) | [aprovado](../seguranca/001.md) |
-| 002 | [Pipeline de qualidade, segurança e performance](002-pipeline-de-qualidade.md) | 1 | em QA | sonnet | 001 | - | - | - |
+| 002 | [Pipeline de qualidade, segurança e performance](002-pipeline-de-qualidade.md) | 1 | pronta (CI real pendente) | sonnet | 001 | [aprovado](../qa/002.md) | [aprovado](../performance/002.md) | [aprovado](../seguranca/002.md) |
 | 003 | [Docker do app e docker compose](003-docker-do-app.md) | 1 | a fazer | sonnet | 001 | - | - | - |
 | 004 | [Supabase local e variáveis de ambiente](004-supabase-local.md) | 1 | a fazer | sonnet | 001, 002 | - | - | - |
 | 005 | [Migration: perfis, ensaios, atribuição e RLS base](005-migration-perfis-e-ensaios.md) | 1 | a fazer | opus | 004 | - | - | - |
