@@ -1,5 +1,5 @@
 # 019 - Onboarding de desenvolvedor em menos de 15 minutos
-Fase: 1 | Status: a fazer | Modelo do desenvolvedor: sonnet
+Fase: 1 | Status: pronta para validação (requer Docker/Supabase) | Modelo do desenvolvedor: sonnet
 
 ## Objetivo
 Garantir e medir que um desenvolvedor novo clona o projeto, preenche o .env.local e abre o sistema no navegador em menos de 15 minutos.
@@ -33,3 +33,9 @@ Unitários: lógica do script, se houver. e2e: o e2e padrão contra o ambiente r
 - A meta de 15 minutos inclui o download inicial das imagens do Docker ou conta só depois dele?
 
 ## Entrega (preenchido pelo desenvolvedor)
+
+Não executado: requer Docker/Supabase local (medição dos 15 minutos, setup duas vezes, e2e no ambiente recém-preparado).
+
+Arquivos: README.md (onboarding, login local, solução de problemas, seção Primeira validação no ambiente com Docker com modelo de docs/qa/validacao-docker.md), scripts/doctor.mjs (node >= 24, docker, supabase, portas, .env.local sem imprimir valores), tests/unit/doctor.test.ts, package.json (npm run doctor, npm run setup:local). O setup existente é scripts/setup-local.mjs (idempotente: não sobrescreve sem --force); não foi criado script único novo que chame supabase start/db reset, para evitar efeitos no banco sem confirmação.
+
+Como testar: npm run doctor; npm test. Com Docker: seguir o README e registrar em docs/qa/validacao-docker.md e docs/ambiente.md.
