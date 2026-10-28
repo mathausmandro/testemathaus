@@ -25,6 +25,7 @@ Fluxo de cada tarefa: analista, desenvolvedor, qa, performance, seguranca. Statu
 | 018 | [Ambientes de teste e produção, Vercel e backup](018-ambientes-teste-e-producao.md) | 1 | pronta para validação (requer Docker/Supabase) | sonnet | 002, 004, 010 | - | - | - |
 | 019 | [Onboarding em menos de 15 minutos](019-onboarding-menos-de-15-minutos.md) | 1 | pronta para validação (requer Docker/Supabase) | sonnet | 003, 004, 010, 016 | - | - | - |
 | 020 | [Migração das telas do Lovable](020-migracao-das-telas-do-lovable.md) | 1 | a fazer (bloqueada: protótipo inexistente) | sonnet | protótipo do Lovable, 014, 016, 017 | - | - | - |
+| 021 | [Otimizações de performance da revisão final](021-otimizacoes-de-performance.md) | 1 | a fazer (requer Docker/Supabase) | sonnet/opus | 005 a 019 | - | - | - |
 
 ## Ordem sugerida
 1. 001, depois 002, 003 e 004 (003 e 004 em paralelo).
