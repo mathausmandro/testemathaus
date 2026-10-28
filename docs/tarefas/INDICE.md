@@ -22,8 +22,8 @@ Fluxo de cada tarefa: analista, desenvolvedor, qa, performance, seguranca. Statu
 | 015 | [Administração de perfis e atribuição de ensaios](015-administracao-de-perfis-e-atribuicao.md) | 1 | pronta para validação (requer Docker/Supabase) | opus | 005, 008, 011, 014 | - | - | - |
 | 016 | [Ensaio de teste e telas mínimas](016-ensaio-de-teste-e-telas-minimas.md) | 1 | pronta para validação (requer Docker/Supabase) | sonnet | 006, 011, 014 (015 em paralelo) | - | - | - |
 | 017 | [Cabeçalhos, validação e suíte test:security](017-cabecalhos-validacao-e-testes-de-seguranca.md) | 1 | pronta para validação (requer Docker/Supabase) | opus | 001, 002, 014 | - | - | - |
-| 018 | [Ambientes de teste e produção, Vercel e backup](018-ambientes-teste-e-producao.md) | 1 | a fazer | sonnet | 002, 004, 010 | - | - | - |
-| 019 | [Onboarding em menos de 15 minutos](019-onboarding-menos-de-15-minutos.md) | 1 | a fazer | sonnet | 003, 004, 010, 016 | - | - | - |
+| 018 | [Ambientes de teste e produção, Vercel e backup](018-ambientes-teste-e-producao.md) | 1 | pronta para validação (requer Docker/Supabase) | sonnet | 002, 004, 010 | - | - | - |
+| 019 | [Onboarding em menos de 15 minutos](019-onboarding-menos-de-15-minutos.md) | 1 | pronta para validação (requer Docker/Supabase) | sonnet | 003, 004, 010, 016 | - | - | - |
 | 020 | [Migração das telas do Lovable](020-migracao-das-telas-do-lovable.md) | 1 | a fazer (bloqueada: protótipo inexistente) | sonnet | protótipo do Lovable, 014, 016, 017 | - | - | - |
 
 ## Ordem sugerida

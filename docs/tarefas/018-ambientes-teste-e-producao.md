@@ -1,5 +1,5 @@
 # 018 - Ambientes de teste e produção, Vercel e backup
-Fase: 1 | Status: a fazer | Modelo do desenvolvedor: sonnet
+Fase: 1 | Status: pronta para validação (requer Docker/Supabase) | Modelo do desenvolvedor: sonnet
 
 ## Objetivo
 Documentar e preparar os ambientes teste (staging) e produção separados, com variáveis por ambiente, fluxo de migrations para a nuvem e backup em produção, de modo que o código já esteja pronto quando as contas e os valores existirem.
@@ -39,3 +39,11 @@ Unitários: guarda dos scripts contra ambiente remoto. e2e: não se aplica. pgTA
 - O repositório e as contas serão da empresa ou pessoais?
 
 ## Entrega (preenchido pelo desenvolvedor)
+
+Não executado: requer contas da Vercel e do Supabase, Docker e repositório remoto.
+
+Arquivos: docs/ambientes.md (runbook, matriz de variáveis, backup e restauração, endereços de retorno para a TI, checklist de go-live), scripts/db-remoto.mjs (guarda: só link e push; recusa reset; produção exige --confirmo=producao; teste e produção com refs distintos), tests/unit/db-remoto.test.ts, .github/workflows/migrations-teste.yml (environment teste, secrets no GitHub), package.json (db:link:teste, db:push:teste, db:push:producao, setup:local, doctor).
+
+Como testar: npm test (db-remoto.test.ts). Com projeto de teste criado: seguir docs/ambientes.md seção 1.
+
+Pendentes: aplicar migrations em projeto remoto (não existe); gitleaks roda no CI; CSP não precisou de ajuste (deriva de NEXT_PUBLIC_SUPABASE_URL), conferir no navegador após o primeiro deploy; restauração documentada, não validada (Fase 6). Dúvidas do Mathaus seguem abertas.
