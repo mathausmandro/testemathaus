@@ -19,6 +19,8 @@ export const STEPS = [
   // pgTAP: obrigatória no CI (CI=true); localmente só é ignorada, com aviso, se o Supabase local faltar.
   { id: "pgtap", name: "pgTAP (supabase test db)", cmd: npx, args: ["supabase", "test", "db"], needsSupabase: true },
   { id: "build", name: "Build", cmd: npm, args: ["run", "build"] },
+  // Depois do build: varre o bundle do cliente, cabeçalhos, rotas e validação (tarefa 017).
+  { id: "security", name: "Segurança (npm run test:security)", cmd: npm, args: ["run", "test:security"] },
   { id: "e2e", name: "Testes e2e (Playwright)", cmd: npx, args: ["playwright", "test"] },
   { id: "perf", name: "Performance (Lighthouse CI)", cmd: "node", args: ["tests/perf/run-lighthouse.mjs", "--skip-build"] },
 ];

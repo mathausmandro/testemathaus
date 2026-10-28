@@ -46,6 +46,8 @@ jobs:
           rm gitleaks.tar.gz
           "${RUNNER_TEMP}/gitleaks/gitleaks" git --config .gitleaks.toml --redact --no-banner .
           "${RUNNER_TEMP}/gitleaks/gitleaks" dir --config .gitleaks.toml --redact --no-banner .
+          # O npm run test:security (dentro do verify) roda o gitleaks de novo e exige o binário no PATH.
+          echo "${RUNNER_TEMP}/gitleaks" >> "${GITHUB_PATH}"
 
       # v7.1.0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
@@ -74,6 +76,19 @@ jobs:
 
       - name: Verificar (npm run verify)
         run: npm run verify
+
+      # G2 (docs/seguranca/002.md): artefatos não podem levar sessão. O e2e no CI roda sem trace
+      # (playwright.config.ts) e o storageState fica em playwright/.auth, fora das pastas enviadas.
+      # Defesa extra: apaga qualquer trace, storageState ou HAR que tenha ido parar nelas.
+      - name: Remover sessão dos artefatos
+        if: always()
+        run: |
+          set -euo pipefail
+          for d in playwright-report test-results; do
+            [ -d "$d" ] || continue
+            # *.zip cobre os traces copiados pelo relatório HTML para playwright-report/data/<hash>.zip.
+            find "$d" -type f \( -name '*.zip' -o -name '*.har' -o -name '*storage*state*.json' -o -path '*/.auth/*' \) -print -delete
+          done
 
       # v7.0.2
       - name: Publicar relatórios

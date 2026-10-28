@@ -8,7 +8,7 @@ const run = (opts: Record<string, unknown>) => runSteps(STEPS, { log: quiet, con
 
 describe("verify: ordem das etapas", () => {
   it("segue a ordem oficial", () => {
-    expect(STEPS.map((s) => s.id)).toEqual(["secrets", "audit", "lint", "typecheck", "test", "pgtap", "build", "e2e", "perf"]);
+    expect(STEPS.map((s) => s.id)).toEqual(["secrets", "audit", "lint", "typecheck", "test", "pgtap", "build", "security", "e2e", "perf"]);
   });
 
   it("executa na ordem e sai com 0 quando tudo passa", () => {

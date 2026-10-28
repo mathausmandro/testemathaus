@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { DataError, traduzirErro } from "./errors";
+import { traduzirErro } from "./errors";
 import type { DbClient, Trial } from "./types";
+import { paraErroDeCampos } from "./validation";
 
 const COLUNAS =
   "id, code, contractor, crop, location, design, planned_start_date, planned_end_date, status, randomization_seed, technical_lead, created_by, created_at, updated_at";
@@ -32,12 +33,6 @@ export const createTrialSchema = z
 export type CreateTrialInput = z.input<typeof createTrialSchema>;
 
 const idSchema = z.uuid("Identificador inválido");
-
-function paraErroDeCampos(e: z.ZodError): DataError {
-  const campos: Record<string, string> = {};
-  for (const i of e.issues) campos[i.path.join(".") || "_"] ??= i.message;
-  return new DataError("invalid", campos);
-}
 
 /** Lista os ensaios visíveis ao usuário (a RLS decide); uma única consulta, sem N+1. */
 export async function listTrials(db: DbClient): Promise<Trial[]> {

@@ -15,10 +15,11 @@ Pipeline único da tarefa 002. Local: `npm run verify`. CI: `.github/workflows/c
 | 5 | Unitários | `npm test` (inclui `tests/unit`, `tests/security`, `src`) | todos passam |
 | 6 | pgTAP | `supabase test db` | ver regra abaixo |
 | 7 | Build | `npm run build` | sem erro |
-| 8 | e2e | `playwright test` (usa o build da etapa 7) | todos passam |
-| 9 | Performance | Lighthouse CI sobre o build (`tests/perf/run-lighthouse.mjs --skip-build`) | ver abaixo |
+| 8 | Segurança | `npm run test:security` (tarefa 017: secretlint, audit, gitleaks no histórico, `tests/security` com varredura do bundle do build da etapa 7) | qualquer falha reprova; gitleaks obrigatório no CI |
+| 9 | e2e | `playwright test` (usa o build da etapa 7) | todos passam |
+| 10 | Performance | Lighthouse CI sobre o build (`tests/perf/run-lighthouse.mjs --skip-build`) | ver abaixo |
 
-Os scripts avulsos continuam: `test:e2e` (faz o próprio build), `test:perf`, `test:security` (secretlint, audit e `vitest run tests/security`).
+Os scripts avulsos continuam: `test:e2e` (faz o próprio build), `test:perf`, `test:security` (`scripts/test-security.mjs`: secretlint, audit, gitleaks quando instalado, build se faltar e `vitest run tests/security`; detalhes em docs/seguranca/base.md).
 
 ## pgTAP: regra de obrigatoriedade
 

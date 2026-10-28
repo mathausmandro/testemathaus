@@ -15,6 +15,8 @@ next-env.d.ts
 /test-results
 /playwright-report
 /.lighthouseci
+# sessão de e2e autenticado (G2): nunca versionar nem publicar
+/playwright/.auth
 /tools/lhci/node_modules
 
 # supabase local

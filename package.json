@@ -12,7 +12,7 @@
         "test:e2e": "npm run build && playwright test",
         "test:perf": "node tests/perf/run-lighthouse.mjs",
         "verify": "node scripts/verify.mjs",
-        "test:security": "secretlint \"**/*\" && npm audit --audit-level=high && vitest run tests/security",
+        "test:security": "node scripts/test-security.mjs",
         "gen:types": "supabase gen types typescript --local --schema public > src/lib/data/database.types.ts",
         "auth:domain": "node scripts/set-allowed-email-domain.mjs"
     },

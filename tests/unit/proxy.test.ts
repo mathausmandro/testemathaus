@@ -141,3 +141,56 @@ describe("proxy", () => {
     expect((await proxy(req("/admin"))).headers.get("location")).toBe(`${BASE}/inicio`);
   });
 });
+
+describe("proxy: CSP com nonce por requisição (tarefa 017)", () => {
+  async function proxyComSessao(estado: unknown) {
+    vi.resetModules();
+    vi.doMock("@/lib/data/proxy-session", () => ({ atualizarSessaoNoProxy: m.atualizar }));
+    m.atualizar.mockImplementation(async (r: NextRequest) => ({ estado, response: NextResponse.next({ request: r }) }));
+    return (await import("@/proxy")).proxy;
+  }
+
+  it.each([
+    ["/", { tipo: "anonimo" }],
+    ["/login", { tipo: "anonimo" }],
+    ["/admin", { tipo: "anonimo" }],
+    ["/admin", { tipo: "com_perfil", perfil: "field" }],
+    ["/inicio", { tipo: "com_perfil", perfil: "field" }],
+    ["/inicio", { tipo: "erro" }],
+  ])("%s (%o): resposta leva a CSP e o nonce vai para a requisição", async (rota, estado) => {
+    const proxy = await proxyComSessao(estado);
+    const r = await proxy(req(rota));
+    const csp = r.headers.get("content-security-policy")!;
+    expect(csp).toMatch(/script-src 'self' 'nonce-[A-Za-z0-9+/=]+' 'strict-dynamic'/);
+    expect(csp).toContain("frame-ancestors 'none'");
+    if (r.headers.get("x-middleware-next") === "1") {
+      // NextResponse.next({ request }) repassa os cabeçalhos alterados da requisição ao Next.
+      const nonce = /'nonce-([^']+)'/.exec(csp)![1];
+      expect(r.headers.get("x-middleware-request-x-nonce")).toBe(nonce);
+      expect(r.headers.get("x-middleware-request-content-security-policy")).toBe(csp);
+    }
+  });
+
+  it("nonce novo a cada requisição", async () => {
+    const proxy = await proxyComSessao({ tipo: "anonimo" });
+    const a = (await proxy(req("/"))).headers.get("content-security-policy");
+    const b = (await proxy(req("/"))).headers.get("content-security-policy");
+    expect(a).not.toBe(b);
+  });
+
+  it("connect-src usa NEXT_PUBLIC_SUPABASE_URL; HTTPS liga upgrade-insecure-requests", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://projeto-ficticio.supabase.test");
+    const proxy = await proxyComSessao({ tipo: "anonimo" });
+    const csp = (await proxy(new NextRequest("https://app.exemplo.test/"))).headers.get("content-security-policy")!;
+    expect(csp).toContain("connect-src 'self' https://projeto-ficticio.supabase.test wss://projeto-ficticio.supabase.test");
+    expect(csp).toContain("upgrade-insecure-requests");
+    const local = (await proxy(req("/"))).headers.get("content-security-policy")!;
+    expect(local).not.toContain("upgrade-insecure-requests");
+  });
+
+  it("sem unsafe-eval fora do next dev", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const proxy = await proxyComSessao({ tipo: "anonimo" });
+    expect((await proxy(req("/"))).headers.get("content-security-policy")).not.toMatch(/unsafe-eval|unsafe-inline/);
+  });
+});

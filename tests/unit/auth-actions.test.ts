@@ -15,7 +15,12 @@ const m = vi.hoisted(() => ({
 vi.mock("next/navigation", () => ({ redirect: m.redirect }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers({ host: "localhost:3000" }) }));
 vi.mock("@/lib/data/server/server-client", () => ({ createServerSupabase: m.criarServidor, limparCookiesDaSessao: m.limpar }));
-vi.mock("@/lib/data/auth", () => ({ iniciarLoginMicrosoft: m.iniciar, entrarComSenha: m.entrar, sair: m.sair }));
+vi.mock("@/lib/data/auth", async (original) => ({
+  ...(await original<typeof import("@/lib/data/auth")>()),
+  iniciarLoginMicrosoft: m.iniciar,
+  entrarComSenha: m.entrar,
+  sair: m.sair,
+}));
 
 import { entrarComMicrosoft, entrarComSenhaLocal } from "@/app/(auth)/login/actions";
 import { sairDaConta } from "@/app/(auth)/actions";
@@ -79,6 +84,17 @@ describe("entrarComSenhaLocal", () => {
     expect(await destino(entrarComSenhaLocal(form({ email: "a@exemplo.test", senha: "x" })))).toBe(
       "/login?erro=credenciais&next=%2Finicio",
     );
+  });
+
+  it("entrada inválida (tarefa 017): validada com zod antes do Supabase, mesma mensagem única", async () => {
+    vi.stubEnv("AUTH_LOCAL_PASSWORD_LOGIN", "true");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
+    m.criarServidor.mockResolvedValue({});
+    const casos: Record<string, string>[] = [{ email: "não-é-email", senha: "x" }, { email: "a@exemplo.test", senha: "" }, {}];
+    for (const dados of casos) {
+      expect(await destino(entrarComSenhaLocal(form(dados)))).toBe("/login?erro=credenciais&next=%2Finicio");
+    }
+    expect(m.entrar).not.toHaveBeenCalled();
   });
 });
 

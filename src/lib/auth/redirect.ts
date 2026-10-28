@@ -1,6 +1,7 @@
 // Validação do parâmetro de retorno (?next=) contra open redirect.
 // Regra: só caminhos relativos do próprio site, começando por um prefixo da lista permitida.
 // Qualquer coisa fora disso (URL absoluta, //host, \host, esquema, controle) cai no destino padrão.
+import { z } from "zod";
 
 /** Destino padrão depois do login. */
 export const DESTINO_PADRAO = "/inicio";
@@ -36,3 +37,10 @@ export function caminhoDeRetornoSeguro(bruto: string | null | undefined, padrao:
   if (!permitido) return padrao;
   return `${caminho}${url.search}${url.hash}`;
 }
+
+/** Campo "next" de formulários e da query string: nunca falha, sempre vira um caminho seguro. */
+export const campoDeRetornoSchema = z
+  .string()
+  .optional()
+  .catch(undefined)
+  .transform((v) => caminhoDeRetornoSeguro(v));

@@ -52,6 +52,14 @@ describe("GET /auth/callback", () => {
     expect(loc).not.toContain("script");
   });
 
+  it("código vazio ou grande demais (validação zod): volta ao login sem tocar no Supabase", async () => {
+    for (const qs of ["?code=", `?code=${"a".repeat(1025)}`]) {
+      const r = await GET(req(qs));
+      expect(r.headers.get("location")).toBe(`${BASE}/login?erro=callback`);
+    }
+    expect(criarServidor).not.toHaveBeenCalled();
+  });
+
   it("falha na troca do código (ou env ausente) volta ao login", async () => {
     criarServidor.mockRejectedValue(new Error("env"));
     const r = await GET(req("?code=abc"));

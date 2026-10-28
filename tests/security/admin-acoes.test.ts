@@ -33,7 +33,7 @@ describe("Server Actions da administração", () => {
     for (const { nome, corpo } of fns) {
       const guarda = corpo.indexOf('await exigirPerfil(["coordination"])');
       expect(guarda, nome).toBeGreaterThan(-1);
-      for (const depois of ["form.get(", "texto(form", "createServerSupabase("]) {
+      for (const depois of ["form.get(", "lerFormulario(form", "createServerSupabase("]) {
         const i = corpo.indexOf(depois);
         if (i > -1) expect(i, `${nome}: ${depois} antes da guarda`).toBeGreaterThan(guarda);
       }
