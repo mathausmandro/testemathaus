@@ -1,5 +1,5 @@
 # 012 - Login com provedor Microsoft configurável e sessão por cookies
-Fase: 1 | Status: pronta para validação (requer Docker/Supabase) | Modelo do desenvolvedor: opus
+Fase: 1 | Status: pronta para validação (requer Docker/Supabase e Entra ID) | Modelo do desenvolvedor: opus
 
 > Parte não executada: requer Docker/Supabase local (login real com usuário de teste, e2e autenticado) e registro no Entra ID pela TI (fluxo Microsoft real).
 
@@ -67,3 +67,8 @@ Unitários: validação de redirecionamento, condição do modo local, leitura d
 ### Observações para revisão
 - Cookies HttpOnly fazem o cliente do navegador (`client/browser.ts`) não enxergar a sessão; realtime e fila offline precisarão de caminho próprio (fases 3 e 4).
 - Mensagem de recusa do hook chega ao callback como `error`; a tela mostra uma mensagem fixa (não reflete a descrição).
+
+### Correções pós-revisão final (28/10/2026)
+
+- QA A4: o status desta tarefa foi alinhado com o INDICE: "pronta para validação (requer Docker/Supabase e Entra ID)".
+- Segurança M1(b): o domínio do e-mail agora também é conferido na sessão, no servidor. `src/lib/auth/dominio.ts` (novo) usa a mesma regra do hook: exatamente um @, sem espaços e domínio igual a `ALLOWED_EMAIL_DOMAIN`. `src/lib/auth/server.ts` trata como sem sessão quem estiver fora do domínio, em páginas, Server Actions e na tela Aguardando. O padrão é seguro: sem `ALLOWED_EMAIL_DOMAIN`, ninguém entra, exceto `exemplo.test` com o login local permitido. Testes: `tests/unit/auth-dominio.test.ts` (novo) e `tests/unit/auth-server.test.ts`.

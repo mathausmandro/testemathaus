@@ -39,3 +39,9 @@ Não executado: requer Docker/Supabase local (medição dos 15 minutos, setup du
 Arquivos: README.md (onboarding, login local, solução de problemas, seção Primeira validação no ambiente com Docker com modelo de docs/qa/validacao-docker.md), scripts/doctor.mjs (node >= 24, docker, supabase, portas, .env.local sem imprimir valores), tests/unit/doctor.test.ts, package.json (npm run doctor, npm run setup:local). O setup existente é scripts/setup-local.mjs (idempotente: não sobrescreve sem --force); não foi criado script único novo que chame supabase start/db reset, para evitar efeitos no banco sem confirmação.
 
 Como testar: npm run doctor; npm test. Com Docker: seguir o README e registrar em docs/qa/validacao-docker.md e docs/ambiente.md.
+
+### Correções pós-revisão final (28/10/2026, QA A3 e A6)
+
+- `npm run setup` (`scripts/setup.mjs`, novo) roda em sequência: `doctor` (pré-requisitos; a falta do `.env.local` não bloqueia), `setup:local` (só se o `.env.local` ainda não existir) e as orientações dos próximos passos. Não roda nada destrutivo: não faz `db reset`, não usa `--force` e não mexe em containers. Testes: `tests/unit/setup.test.ts`.
+- README: o passo a passo usa `npm run setup`, inclui a linha de `AUTH_LOCAL_PASSWORD_LOGIN=true` (A6) e avisa que o app não sobe sem as variáveis obrigatórias.
+- Como testar aqui: `npm run setup` sem Docker para em "Pendências antes de continuar: Docker" (código 1), mostra as orientações e não cria o `.env.local` (executado).

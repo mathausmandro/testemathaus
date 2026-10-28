@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { faltantesFicticias, nomesNosArquivosEnv } from "./scripts/env-ficticia.mjs";
 
 const port = 3100;
 const ci = Boolean(process.env.CI);
@@ -29,5 +30,8 @@ export default defineConfig({
     url: `http://localhost:${port}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    // O app falha na inicialização sem as variáveis obrigatórias (src/instrumentation.ts). Sem
+    // .env.local, o servidor do e2e recebe só valores FICTÍCIOS e não secretos do que faltar.
+    env: faltantesFicticias(process.env, nomesNosArquivosEnv(process.cwd())),
   },
 });

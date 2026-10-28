@@ -3,6 +3,7 @@
 // Falhas (variáveis ausentes, Supabase fora do ar) nunca liberam acesso: viram "anonimo" ou "erro".
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { ambienteDoDominio, emailPermitidoNaSessao } from "../auth/dominio";
 import type { EstadoDaSessao } from "../auth/routes";
 import { getPublicEnv } from "../env";
 import { opcoesDoCookieDeSessao } from "./cookie-options";
@@ -38,6 +39,17 @@ export async function atualizarSessaoNoProxy(request: NextRequest): Promise<Sess
     const { data, error } = await db.auth.getClaims();
     const userId = data?.claims?.sub;
     if (error || !userId) return { estado: { tipo: "anonimo" }, response };
+
+    // E-mail fora do domínio permitido (ALLOWED_EMAIL_DOMAIN): encerra a sessão e trata como anônimo.
+    const email = typeof data.claims.email === "string" ? data.claims.email : null;
+    if (!emailPermitidoNaSessao(email, ambienteDoDominio())) {
+      try {
+        await db.auth.signOut({ scope: "local" });
+      } catch {
+        // mesmo sem o Auth, a decisão continua sendo "sem acesso"
+      }
+      return { estado: { tipo: "anonimo" }, response };
+    }
 
     const { data: perfil, error: erroPerfil } = await db.from("profiles").select("role").eq("id", userId).maybeSingle();
     if (erroPerfil) return { estado: { tipo: "erro" }, response };

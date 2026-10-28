@@ -76,3 +76,20 @@ describe("workflow de CI: Supabase local", () => {
     expect(idx(/Exportar variáveis públicas/)).toBeLessThan(idx(/Verificar/));
   });
 });
+
+describe("workflow de migrations no teste (B5)", () => {
+  const mig = parse(readFileSync(".github/workflows/migrations-teste.yml", "utf8"));
+  const job = mig.jobs["push-teste"];
+
+  it("só a main usa o environment teste", () => {
+    expect(job.environment).toBe("teste");
+    expect(job.if).toBe("github.ref == 'refs/heads/main'");
+    expect(mig.on.push.branches).toEqual(["main"]);
+  });
+
+  it("o runbook manda restringir o environment à main no GitHub", () => {
+    const doc = readFileSync("docs/ambientes.md", "utf8");
+    expect(doc).toMatch(/Deployment branches/);
+    expect(doc).toMatch(/Selected branches.*main/);
+  });
+});

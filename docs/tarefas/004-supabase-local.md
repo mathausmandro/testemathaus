@@ -52,3 +52,14 @@ Não executado: requer Docker/Supabase local (orientação de 27/10/2026). `supa
 - A validação de env não roda na inicialização do app: com `next start` sem `.env.local` o e2e e o Lighthouse quebrariam, e ainda não há consumidor. `getPublicEnv()`/`getServerEnv()` falham com mensagem em português no primeiro uso; ligar na inicialização (instrumentation) fica para a tarefa 011/012. Critério "app falha na inicialização" fica parcial.
 - Busca por SUPABASE_SECRET_KEY no bundle do cliente: coberta por teste estático (só `env.server.ts` a cita; `server-only`); varredura do bundle real pendente até haver consumidor.
 - Acesso por perfil: não se aplica (sem tabelas). pgTAP: suíte vazia não executada (requer Docker). Tempo do `supabase start`: não medido.
+
+### Correções pós-revisão final (28/10/2026, QA A1)
+
+O desvio acima foi corrigido: o app agora falha na inicialização sem variável obrigatória.
+
+- `src/instrumentation.ts` (novo): `register()` chama `validarAmbienteNaInicializacao` (`src/lib/env-startup.ts`, novo). Valida as públicas em qualquer runtime e, no `nodejs`, também as do servidor (`getServerEnv`). Em caso de falha, imprime em pt-BR só os nomes das variáveis e encerra com código 1.
+- `next.config.ts`: no build de produção, a falta de `NEXT_PUBLIC_*` interrompe o build com mensagem clara. As variáveis são embutidas no build, então sem elas o resultado sairia quebrado. A config passou a ser exportada como função; `nextConfig` continua exportado para os testes.
+- Valores fictícios só nos processos de teste: `scripts/env-ficticia.mjs` (novo) preenche apenas o que falta (ambiente e `.env*` que o Next carrega) com valores fictícios, não secretos e marcados. Usado em `scripts/verify.mjs` (etapas build, e2e e perf), `playwright.config.ts` (`webServer.env`), `tests/perf/run-lighthouse.mjs` e `npm run test:e2e` (`scripts/com-env-ficticia.mjs`). Nenhum `.env` versionado recebe esses valores.
+- Testes: `tests/unit/env-startup.test.ts` (novo), `tests/security/cabecalhos.test.ts` (usa `nextConfig`).
+- Como testar: sem `.env.local`, `npm run build` falha ("Build interrompido. Variáveis de ambiente inválidas: NEXT_PUBLIC_SUPABASE_URL não definida..."). Com `node scripts/com-env-ficticia.mjs npm run build`, o build passa. `next start` sem env encerra com "Falha na inicialização do servidor: ... SUPABASE_SECRET_KEY não definida". Com `node scripts/com-env-ficticia.mjs node node_modules/next/dist/bin/next start -p 3400`, o servidor sobe e `/login` responde 200. Tudo isso foi executado aqui. `npm run verify` OK: e2e com 25 passaram e 21 pulados; Lighthouse passou.
+- Atenção: o compose `prod` e a Vercel passam a exigir `SUPABASE_SECRET_KEY` em tempo de execução, e a imagem Docker exige os `NEXT_PUBLIC_*` como ARG de build. Já era o esperado pela matriz de variáveis.

@@ -47,3 +47,10 @@ Arquivos: docs/ambientes.md (runbook, matriz de variáveis, backup e restauraç�
 Como testar: npm test (db-remoto.test.ts). Com projeto de teste criado: seguir docs/ambientes.md seção 1.
 
 Pendentes: aplicar migrations em projeto remoto (não existe); gitleaks roda no CI; CSP não precisou de ajuste (deriva de NEXT_PUBLIC_SUPABASE_URL), conferir no navegador após o primeiro deploy; restauração documentada, não validada (Fase 6). Dúvidas do Mathaus seguem abertas.
+
+### Correções pós-revisão final (28/10/2026, segurança M1, M2 e B5)
+
+- M2: antes do `push`, `scripts/db-remoto.mjs` confere se `supabase/.temp/project-ref` é o ref do ambiente pedido (lido de `SUPABASE_PROJECT_REF_TESTE` ou `SUPABASE_PROJECT_REF_PRODUCAO`, nunca fixo no código). Se a pasta estiver vinculada a outro projeto ou a nenhum, o comando recusa sem imprimir os refs. Produção continua exigindo `--confirmo=producao`. Novo script `npm run db:link:producao`. Testes em `tests/unit/db-remoto.test.ts`.
+- M1: `docs/ambientes.md` ganhou a seção 1.1 (desligar o provedor e-mail/senha, habilitar o hook "Before User Created", conferir `app_private.auth_settings`, testar cadastro por senha e de outro domínio) e itens novos no checklist. O B1 (`require_verified_email_claim = true`) entrou no checklist como bloqueio de go-live.
+- B5: `docs/ambientes.md`, seção 5, descreve o que configurar no GitHub: environment `teste` com "Selected branches: main", revisor obrigatório, secrets no environment e proteção da `main`. O job de `.github/workflows/migrations-teste.yml` ganhou `if: github.ref == 'refs/heads/main'`. Teste em `tests/unit/ci-workflow.test.ts`.
+- B2, B3, B4 e B6 ficaram registrados como pendências em `docs/seguranca/decisoes.md` (D5), sem implementação.

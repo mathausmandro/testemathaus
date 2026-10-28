@@ -4,6 +4,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { comEnvFicticia } from "./env-ficticia.mjs";
 
 const isWin = process.platform === "win32";
 const npm = isWin ? "npm.cmd" : "npm";
@@ -18,11 +19,13 @@ export const STEPS = [
   { id: "test", name: "Testes unitários", cmd: npm, args: ["test"] },
   // pgTAP: obrigatória no CI (CI=true); localmente só é ignorada, com aviso, se o Supabase local faltar.
   { id: "pgtap", name: "pgTAP (supabase test db)", cmd: npx, args: ["supabase", "test", "db"], needsSupabase: true },
-  { id: "build", name: "Build", cmd: npm, args: ["run", "build"] },
+  // build, e2e e Lighthouse sobem o app sem Supabase: recebem valores fictícios só do que faltar
+  // (scripts/env-ficticia.mjs). O app valida as variáveis no build e na inicialização.
+  { id: "build", name: "Build", cmd: npm, args: ["run", "build"], envFicticia: true },
   // Depois do build: varre o bundle do cliente, cabeçalhos, rotas e validação (tarefa 017).
   { id: "security", name: "Segurança (npm run test:security)", cmd: npm, args: ["run", "test:security"] },
-  { id: "e2e", name: "Testes e2e (Playwright)", cmd: npx, args: ["playwright", "test"] },
-  { id: "perf", name: "Performance (Lighthouse CI)", cmd: "node", args: ["tests/perf/run-lighthouse.mjs", "--skip-build"] },
+  { id: "e2e", name: "Testes e2e (Playwright)", cmd: npx, args: ["playwright", "test"], envFicticia: true },
+  { id: "perf", name: "Performance (Lighthouse CI)", cmd: "node", args: ["tests/perf/run-lighthouse.mjs", "--skip-build"], envFicticia: true },
 ];
 
 /** @param {Record<string, string | undefined>} [env] */
@@ -30,9 +33,19 @@ export function isCI(env = process.env) {
   return env.CI === "true" || env.CI === "1";
 }
 
+/**
+ * Ambiente do processo da etapa: com valores fictícios (só os que faltam) quando a etapa pede.
+ * @param {{ envFicticia?: boolean }} step
+ * @param {Record<string, string | undefined>} [env]
+ * @param {string} [dir]
+ */
+export function ambienteDaEtapa(step, env = process.env, dir = process.cwd()) {
+  return step.envFicticia ? comEnvFicticia(env, dir) : env;
+}
+
 /** Executor real: herda stdio e devolve o código de saída. */
 export function realExec(step) {
-  const r = spawnSync(step.cmd, step.args, { stdio: "inherit", shell: isWin });
+  const r = spawnSync(step.cmd, step.args, { stdio: "inherit", shell: isWin, env: ambienteDaEtapa(step) });
   return r.status ?? 1;
 }
 

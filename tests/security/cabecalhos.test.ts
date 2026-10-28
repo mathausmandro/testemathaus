@@ -52,7 +52,7 @@ let fixos: { key: string; value: string }[] = [];
 beforeAll(async () => {
   vi.stubEnv("NODE_ENV", "production");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://projeto-ficticio.supabase.test");
-  const cfg = (await import("../../next.config")).default;
+  const cfg = (await import("../../next.config")).nextConfig;
   const regras = await cfg.headers!();
   // Uma regra para todos os caminhos: nenhuma página escapa dos cabeçalhos fixos.
   expect(regras.map((r) => r.source)).toEqual(["/:path*"]);
@@ -99,7 +99,7 @@ describe("cabeçalhos de segurança em todas as rotas", () => {
 
   it("o next.config não liga cabeçalho que enfraquece (CORS aberto, powered-by)", async () => {
     expect(fixos.map((f) => f.key.toLowerCase())).not.toContain("access-control-allow-origin");
-    const cfg = (await import("../../next.config")).default;
+    const cfg = (await import("../../next.config")).nextConfig;
     expect(cfg.poweredByHeader).toBe(false);
   });
 

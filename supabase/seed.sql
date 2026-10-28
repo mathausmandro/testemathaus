@@ -10,6 +10,9 @@
 -- novos). O domínio real NÃO entra aqui: use npm run auth:domain com ALLOWED_EMAIL_DOMAIN.
 -- ---------------------------------------------------------------------------
 update app_private.auth_settings set local_test_mode = true;
+-- Correção pós-revisão (M1): só no local, aceita cadastro por e-mail/senha (usuários fictícios e o e2e
+-- do hook). Em teste e produção o padrão é só azure (db push não aplica o seed).
+update app_private.auth_settings set allow_non_azure_providers = true;
 
 -- ---------------------------------------------------------------------------
 -- Tarefa 005: um usuário por perfil e um sem perfil; dois ensaios

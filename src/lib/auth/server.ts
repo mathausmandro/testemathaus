@@ -5,13 +5,24 @@
 import "server-only";
 import { notFound, redirect } from "next/navigation";
 import { DataError } from "../data/errors";
-import { obterSessao, type Sessao } from "../data/server/session";
+import { obterSessao as obterSessaoDoSupabase, type Sessao } from "../data/server/session";
 import type { AppRole, Profile } from "../data/types";
+import { ambienteDoDominio, emailPermitidoNaSessao } from "./dominio";
 import { avaliarAcesso } from "./guard";
 import { DESTINO_PADRAO } from "./redirect";
 import { ROTA_AGUARDANDO, ROTA_LOGIN } from "./routes";
 
 export type SessaoComPerfil = Sessao & { perfil: Profile & { role: AppRole } };
+
+/**
+ * Sessão válida no Supabase E com e-mail do domínio permitido (ALLOWED_EMAIL_DOMAIN). Fora do
+ * domínio, a sessão é tratada como inexistente (o proxy também a encerra). Regra 6 do CLAUDE.md.
+ */
+async function obterSessao(): Promise<Sessao | null> {
+  const sessao = await obterSessaoDoSupabase();
+  if (!sessao) return null;
+  return emailPermitidoNaSessao(sessao.email, ambienteDoDominio()) ? sessao : null;
+}
 
 export async function exigirSessao(): Promise<Sessao> {
   const sessao = await obterSessao();

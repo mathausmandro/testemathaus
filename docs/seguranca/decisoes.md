@@ -39,3 +39,16 @@ Dados de ensaio, perfil ou campo nunca usam `"use cache"` nem `"use cache: remot
 ## D4 - Artefatos do e2e (G2, tarefa 017)
 
 No CI não há trace, vídeo nem captura do Playwright. Um storageState de e2e autenticado fica em `playwright/.auth/` (no .gitignore e fora das pastas enviadas). O workflow apaga `*.zip`, `*.har` e storageState de `playwright-report/` e `test-results/` antes do upload. O e2e só usa o Supabase local com usuários fictícios. Cobrado por `tests/security/artefatos-e2e.test.ts`.
+
+## D5 - Pendências da revisão de segurança 003-019 (28/10/2026)
+
+Corrigidos na revisão pós-final: M1 (hook só azure fora do modo local, domínio conferido também no servidor e no proxy, runbook em docs/ambientes.md seção 1.1), M2 (`db-remoto.mjs` confere `supabase/.temp/project-ref` antes do push) e B5 (environment `teste` restrito à `main`, docs/ambientes.md seção 5). B1 virou bloqueio de go-live no checklist de docs/ambientes.md.
+
+Ficam **registrados, sem implementação**, para tarefa futura (cada um precisa de decisão ou de tarefa própria):
+
+| Id | Achado (docs/seguranca/003-019.md) | Quando tratar | Decisão pendente |
+| --- | --- | --- | --- |
+| B2 | Sessão do Supabase sobrevive à conta Microsoft desativada (refresh token sem expiração) | Antes do go-live (Fase 1/6) | Procedimento de desligamento (revogar perfil e encerrar sessões pelo admin) e *time-box* ou *inactivity timeout* de sessão em produção; definir os prazos com o Mathaus |
+| B3 | Upload de fotos sem vínculo com o registro nem com o autor (caminho `<trial_id>/...` livre para qualquer field do ensaio) | Fase 3 (fotos e fila offline) | Política de storage exigindo `field_records.id` do mesmo ensaio criado por `auth.uid()`, nome com uuid do aparelho e validação do conteúdo da imagem no servidor |
+| B4 | A pessoa edita o próprio `full_name` e pode se passar por outra na fila "Aguardando liberação" | Tarefa de ajuste da administração (Fase 1) | Destacar o e-mail como identificador na tela ou tirar `full_name` do UPDATE do próprio usuário |
+| B6 | Localização precisa (6 casas) de pessoas guardada para sempre, inclusive em `change_history`, visível a home_office; EXIF das fotos | Fase 3, com o Mathaus (LGPD) | Finalidade, base legal e retenção; menos casas decimais; remover EXIF além do necessário; home_office precisa ver as coordenadas? |

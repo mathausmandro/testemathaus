@@ -16,6 +16,7 @@ function clienteFalso(opts: { claims?: unknown; erroClaims?: unknown; perfil?: u
   const select = vi.fn(() => ({ eq }));
   return {
     auth: {
+      signOut: vi.fn().mockResolvedValue({ error: null }),
       getClaims: opts.lanca
         ? vi.fn().mockRejectedValue(new Error("rede"))
         : vi.fn().mockResolvedValue({ data: opts.claims ? { claims: opts.claims } : null, error: opts.erroClaims ?? null }),
@@ -28,6 +29,7 @@ function clienteFalso(opts: { claims?: unknown; erroClaims?: unknown; perfil?: u
 function envLocal() {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "pub");
+  vi.stubEnv("ALLOWED_EMAIL_DOMAIN", "exemplo.test");
 }
 
 afterEach(() => {
@@ -41,6 +43,24 @@ describe("atualizarSessaoNoProxy", () => {
     const { estado } = await atualizarSessaoNoProxy(req("/inicio"));
     expect(estado).toEqual({ tipo: "anonimo" });
     expect(m.criarCliente).not.toHaveBeenCalled();
+  });
+
+  it("e-mail fora de ALLOWED_EMAIL_DOMAIN: encerra a sessão e trata como anônimo (M1)", async () => {
+    envLocal();
+    vi.stubEnv("ALLOWED_EMAIL_DOMAIN", "empresa-ficticia.test");
+    const c = clienteFalso({ claims: { sub: "u1", email: "a@outro.test" }, perfil: { role: "coordination" } });
+    m.criarCliente.mockReturnValue(c);
+    expect((await atualizarSessaoNoProxy(req("/inicio"))).estado).toEqual({ tipo: "anonimo" });
+    expect(c.auth.signOut).toHaveBeenCalledWith({ scope: "local" });
+    expect(c.from).not.toHaveBeenCalled();
+  });
+
+  it("sem ALLOWED_EMAIL_DOMAIN e fora do modo local: nenhuma sessão vale (M1)", async () => {
+    envLocal();
+    vi.stubEnv("ALLOWED_EMAIL_DOMAIN", "");
+    const c = clienteFalso({ claims: { sub: "u1", email: "a@exemplo.test" }, perfil: { role: "field" } });
+    m.criarCliente.mockReturnValue(c);
+    expect((await atualizarSessaoNoProxy(req("/inicio"))).estado).toEqual({ tipo: "anonimo" });
   });
 
   it("sem claims: anônimo", async () => {
@@ -57,15 +77,15 @@ describe("atualizarSessaoNoProxy", () => {
 
   it("com sessão e sem perfil (ou role nula): sem_perfil", async () => {
     envLocal();
-    m.criarCliente.mockReturnValue(clienteFalso({ claims: { sub: "u1" }, perfil: { role: null } }));
+    m.criarCliente.mockReturnValue(clienteFalso({ claims: { sub: "u1", email: "a@exemplo.test" }, perfil: { role: null } }));
     expect((await atualizarSessaoNoProxy(req("/inicio"))).estado).toEqual({ tipo: "sem_perfil" });
-    m.criarCliente.mockReturnValue(clienteFalso({ claims: { sub: "u1" }, perfil: null }));
+    m.criarCliente.mockReturnValue(clienteFalso({ claims: { sub: "u1", email: "a@exemplo.test" }, perfil: null }));
     expect((await atualizarSessaoNoProxy(req("/inicio"))).estado).toEqual({ tipo: "sem_perfil" });
   });
 
   it("com perfil: consulta o próprio id e devolve o papel", async () => {
     envLocal();
-    const c = clienteFalso({ claims: { sub: "u1" }, perfil: { role: "field" } });
+    const c = clienteFalso({ claims: { sub: "u1", email: "a@exemplo.test" }, perfil: { role: "field" } });
     m.criarCliente.mockReturnValue(c);
     expect((await atualizarSessaoNoProxy(req("/inicio"))).estado).toEqual({ tipo: "com_perfil", perfil: "field" });
     expect(c._eq).toHaveBeenCalledWith("id", "u1");
@@ -73,7 +93,7 @@ describe("atualizarSessaoNoProxy", () => {
 
   it("erro ao ler o perfil ou exceção: erro (nunca libera)", async () => {
     envLocal();
-    m.criarCliente.mockReturnValue(clienteFalso({ claims: { sub: "u1" }, erroPerfil: { code: "500" } }));
+    m.criarCliente.mockReturnValue(clienteFalso({ claims: { sub: "u1", email: "a@exemplo.test" }, erroPerfil: { code: "500" } }));
     expect((await atualizarSessaoNoProxy(req("/inicio"))).estado).toEqual({ tipo: "erro" });
     m.criarCliente.mockReturnValue(clienteFalso({ lanca: true }));
     expect((await atualizarSessaoNoProxy(req("/inicio"))).estado).toEqual({ tipo: "erro" });
@@ -83,7 +103,7 @@ describe("atualizarSessaoNoProxy", () => {
     envLocal();
     m.criarCliente.mockImplementation((_u: string, _k: string, opcoes: { cookieOptions: unknown; cookies: { setAll: (l: unknown[], h: Record<string, string>) => void } }) => {
       expect(opcoes.cookieOptions).toMatchObject({ httpOnly: true, sameSite: "lax" });
-      const c = clienteFalso({ claims: { sub: "u1" }, perfil: { role: "coordination" } });
+      const c = clienteFalso({ claims: { sub: "u1", email: "a@exemplo.test" }, perfil: { role: "coordination" } });
       const original = c.auth.getClaims;
       c.auth.getClaims = vi.fn(async () => {
         opcoes.cookies.setAll([{ name: "sb-x-auth-token", value: "novo", options: { httpOnly: true, path: "/" } }], {

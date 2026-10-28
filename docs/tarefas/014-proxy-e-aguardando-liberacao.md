@@ -62,3 +62,7 @@ Unitários: helper de exigir sessão e perfil; decisão de redirecionamento do p
 
 ### Não executado
 - e2e autenticado (tests/e2e/perfis.spec.ts e login-local.spec.ts) e cabeçalho de cache com sessão real: requerem Docker/Supabase.
+
+### Correções pós-revisão final (28/10/2026, segurança M1)
+
+- `src/lib/data/proxy-session.ts`: se o e-mail da sessão (claim `email`) estiver fora de `ALLOWED_EMAIL_DOMAIN`, o proxy encerra a sessão (`signOut({ scope: "local" })`) e trata o acesso como anônimo. O servidor faz a mesma conferência (tarefa 012), e assim não há laço de redirecionamento entre o proxy e as páginas. Testes: `tests/unit/proxy.test.ts`.

@@ -43,7 +43,34 @@ Como a Vercel separa: ao cadastrar cada variável, marque **somente** o ambiente
    ```
 4. Seed não é aplicado em teste nem em produção (`db push` não roda `seed.sql`). Usuários fictícios ficam só no local.
 5. Em Authentication: habilitar o provedor Azure (Microsoft) com os dados da TI (docs/auth-microsoft.md) e gravar o domínio: `ALLOWED_EMAIL_DOMAIN` e `npm run auth:domain` apontando para o teste.
-6. Atribuir o perfil `coordination` ao primeiro usuário (SQL Editor, conforme docs/auth-microsoft.md), depois a coordenação libera os demais pela tela.
+6. **Barreira de domínio no projeto remoto** (achado M1; `supabase db push` não leva o `config.toml`, então nada disto vem sozinho). Siga a seção 1.1 abaixo antes de liberar o acesso a qualquer pessoa.
+7. Atribuir o perfil `coordination` ao primeiro usuário (SQL Editor, conforme docs/auth-microsoft.md), depois a coordenação libera os demais pela tela.
+
+### 1.1 Runbook: provedor e-mail/senha desligado e hook habilitado (teste e produção)
+
+Todo projeto Supabase novo vem com o provedor **Email** ligado e cadastro aberto. Com a chave publicável (que é pública), qualquer pessoa chamaria `/auth/v1/signup`. Faça em **cada** projeto remoto (teste e produção):
+
+1. **Desligar e-mail/senha.** Authentication > Sign In / Providers > Email: desmarcar "Enable Email provider" (login e cadastro). Em Authentication > Settings, deixar "Allow new users to sign up" ligado só se o provedor Azure precisar (o cadastro acontece no primeiro login Microsoft); "Allow anonymous sign-ins" e "Phone" desligados.
+2. **Habilitar o hook.** Authentication > Hooks > "Before User Created": tipo Postgres, schema `public`, função `hook_before_user_created` (equivale a `pg-functions://postgres/public/hook_before_user_created`). Salvar e conferir que aparece como habilitado.
+3. **Conferir a configuração do banco** (SQL Editor, só leitura):
+   ```sql
+   select allowed_email_domain is not null as dominio_gravado,
+          local_test_mode, allow_non_azure_providers, require_verified_email_claim
+   from app_private.auth_settings;
+   ```
+   Esperado: `dominio_gravado = true`, `local_test_mode = false`, `allow_non_azure_providers = false` (padrão da migration 20261028120000; só o seed local liga). `require_verified_email_claim`: ver o item 6.
+4. **Testar o cadastro por senha** (deve ser recusado): com a URL e a chave publicável do projeto,
+   ```
+   curl -s -X POST "https://<ref>.supabase.co/auth/v1/signup" -H "apikey: <chave-publicavel>" -H "Content-Type: application/json" -d "{\"email\":\"teste@<dominio>\",\"password\":\"<senha-qualquer-longa>\"}"
+   ```
+   Esperado: erro (provedor desligado ou "Cadastro não permitido"). Repita com um e-mail de **outro domínio**: também recusado. Se algum criar usuário, apague-o em Authentication > Users e volte ao passo 1.
+5. **Testar o login Microsoft** com uma conta da empresa (aceito) e, se a TI tiver, com uma conta de convidado ou de outro domínio no tenant (recusado).
+6. **B1: exigir `xms_edov` (bloqueio de go-live).** Depois que a TI emitir a claim opcional `xms_edov` no registro do app (docs/auth-microsoft.md), confirmar no primeiro login real onde ela chega (`raw_user_meta_data` do usuário) e ligar:
+   ```sql
+   update app_private.auth_settings set require_verified_email_claim = true, updated_at = now();
+   ```
+   Sem isso, um atributo `mail` não verificado no tenant passaria no hook. **A produção não entra no ar com `require_verified_email_claim = false`.**
+7. **Segunda barreira no app.** `ALLOWED_EMAIL_DOMAIN` precisa estar definida na Vercel (Preview e Production). Sem ela, o app recusa **toda** sessão (src/lib/auth/dominio.ts) e o proxy encerra a sessão de quem estiver fora do domínio.
 
 ## 2. Criar o projeto Supabase de produção
 
@@ -54,7 +81,7 @@ npm run db:push:producao -- --dry-run     # mostra o que seria aplicado
 npm run db:push:producao                  # aplica; exige a confirmação embutida
 ```
 
-Aplicar em produção só depois de a mesma migration ter passado no teste. O `link` de produção deve ser feito em sessão separada (feche o terminal do teste) para não aplicar no projeto errado; a CLI usa o último `link`.
+Aplicar em produção só depois de a mesma migration ter passado no teste. Antes do push de produção, vincule a pasta à produção com `npm run db:link:producao` (exige a mesma confirmação). A CLI aplica no **último projeto vinculado** (gravado em `supabase/.temp/project-ref`), por isso o `push` confere esse arquivo: se ele não for o ref do ambiente pedido (lido de `SUPABASE_PROJECT_REF_TESTE` ou `SUPABASE_PROJECT_REF_PRODUCAO`), o comando recusa e manda refazer o `link` (achado M2).
 
 ## 3. Guardas contra comandos destrutivos
 
@@ -64,6 +91,7 @@ Aplicar em produção só depois de a mesma migration ter passado no teste. O `l
 - exige o ambiente (`teste` ou `producao`) e as variáveis do projeto correspondente;
 - produção exige `--confirmo=producao`;
 - recusa teste e produção com a mesma referência;
+- `push` só roda se `supabase/.temp/project-ref` for o ref do ambiente pedido (os refs vêm das variáveis de ambiente, nunca fixos no código); vinculada a outro projeto ou a nenhum, recusa;
 - não imprime nenhum valor.
 
 `podeResetar(url)` no mesmo arquivo só aceita URL local (loopback). `supabase db reset` deve ser usado somente com `--local` (padrão), e nunca com `--linked`. Evite `npx supabase db reset --linked`.
@@ -79,6 +107,16 @@ Aplicar em produção só depois de a mesma migration ter passado no teste. O `l
 ## 5. GitHub Actions: migrations no teste
 
 `.github/workflows/migrations-teste.yml` aplica as migrations no projeto de teste quando algo muda em `supabase/migrations` na `main` (ou manualmente). Usa o *environment* `teste` do GitHub com os secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD_TESTE` e `SUPABASE_PROJECT_REF_TESTE`. O pgTAP já roda antes, no `ci.yml`. **Produção não é aplicada por workflow**: é decisão humana, com `npm run db:push:producao` (ou, no futuro, um environment com aprovação manual).
+
+**Restringir o environment à `main` (B5; configuração do repositório, não do código).** Quem tem escrita poderia disparar o workflow (`workflow_dispatch`) a partir de outra branch com o YAML alterado, ler os secrets ou aplicar migration não revisada. No GitHub:
+
+1. Settings > Environments > `teste` (criar se não existir).
+2. "Deployment branches and tags": escolher **Selected branches and tags** e adicionar só a regra `main` (Selected branches: main). Nenhuma outra branch ou tag.
+3. Se o plano do repositório permitir: "Required reviewers" com o Mathaus (ou o responsável pelas migrations) e "Prevent self-review".
+4. Cadastrar os três secrets **dentro do environment** `teste`, não em "Repository secrets".
+5. Settings > Branches: proteger a `main` (PR obrigatório, CI verde), para que a regra do environment valha de fato.
+
+O workflow também tem `if: github.ref == 'refs/heads/main'` no job, como segunda barreira (tests/unit/ci-workflow.test.ts).
 
 ## 6. CSP com domínios reais
 
@@ -116,7 +154,10 @@ Prévias com endereço variável da Vercel não devem ser cadastradas no Entra I
 - [ ] Prévia aberta e conferida: aponta para o projeto de teste.
 - [ ] `AUTH_LOCAL_PASSWORD_LOGIN` vazia e `APP_ENV=production` em produção; tela de login sem formulário de senha.
 - [ ] Entra ID registrado (TI) com os endereços da seção 8; login Microsoft funcionando em teste.
-- [ ] Domínio de e-mail gravado (`auth:domain`) e `require_verified_email_claim` avaliado.
+- [ ] Domínio de e-mail gravado (`auth:domain`) e `ALLOWED_EMAIL_DOMAIN` definida na Vercel (Preview e Production).
+- [ ] Runbook 1.1 feito nos dois projetos: provedor Email desligado, hook "Before User Created" habilitado, `allow_non_azure_providers = false`, cadastro por senha e de outro domínio testados e recusados.
+- [ ] **Bloqueio de go-live (B1):** `require_verified_email_claim = true` em produção, depois de a TI emitir a claim `xms_edov` e de o caminho da claim ser confirmado no primeiro login real.
+- [ ] Environment `teste` do GitHub restrito à `main` (seção 5).
 - [ ] Primeiro usuário `coordination` atribuído; um usuário sem perfil vê "Aguardando liberação".
 - [ ] Backup automático de produção ativo; primeira cópia `pg_dump` guardada; retenção registrada.
 - [ ] `SUPABASE_SECRET_KEY` só no servidor (bundle conferido por `npm run test:security`).

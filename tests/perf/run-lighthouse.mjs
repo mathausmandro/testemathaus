@@ -5,6 +5,7 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
+import { comEnvFicticia } from "../../scripts/env-ficticia.mjs";
 
 const PORT = 3200;
 const isWin = process.platform === "win32";
@@ -14,6 +15,9 @@ const skipBuild = process.argv.includes("--skip-build");
 // /cli fica isolado em tools/lhci (package-lock próprio, npm ci --ignore-scripts).
 const LHCI_DIR = path.resolve("tools", "lhci");
 const LHCI_CLI = path.join(LHCI_DIR, "node_modules", "@lhci", "cli", "src", "cli.js");
+// O app valida as variáveis no build e na inicialização; sem .env.local, usa valores fictícios
+// (só os que faltam; nunca sobrescreve os reais).
+const envDoApp = comEnvFicticia();
 const run = (cmd, args, opts = {}) =>
   spawnSync(cmd, args, { stdio: "inherit", shell: isWin, ...opts });
 
@@ -57,11 +61,11 @@ if (!fs.existsSync(LHCI_CLI)) {
 }
 
 if (!skipBuild) {
-  const build = run(npm, ["run", "build"]);
+  const build = run(npm, ["run", "build"], { env: envDoApp });
   if (build.status !== 0) process.exit(build.status ?? 1);
 }
 
-const server = spawn(npx, ["next", "start", "-p", String(PORT)], { stdio: "inherit", shell: isWin });
+const server = spawn(npx, ["next", "start", "-p", String(PORT)], { stdio: "inherit", shell: isWin, env: envDoApp });
 const stop = () => {
   if (isWin) spawnSync("taskkill", ["/pid", String(server.pid), "/T", "/F"], { stdio: "ignore" });
   else server.kill("SIGTERM");

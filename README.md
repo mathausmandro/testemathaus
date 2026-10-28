@@ -21,12 +21,15 @@ git clone <endereço-do-repositório>
 cd plataforma-ensaios
 npm ci
 npx supabase start          # sobe o Supabase local (primeira vez baixa imagens)
-npm run setup:local         # gera .env.local a partir do Supabase local (sem imprimir chaves)
-npx supabase db reset       # aplica migrations e o seed (usuários fictícios)
+npm run setup               # doctor + gera .env.local (setup:local) + próximos passos; nada destrutivo
+npx supabase db reset       # aplica migrations e o seed (usuários fictícios); APAGA o banco local
+# acrescente AUTH_LOCAL_PASSWORD_LOGIN=true ao .env.local para o login de teste (seção Login local)
 npm run dev                 # http://localhost:3000
 ```
 
-Rodar `npm run setup:local` de novo não sobrescreve o `.env.local` (use `-- --force` para recriar). O script nunca imprime chaves nem grava em arquivo versionado.
+`npm run setup` encadeia `npm run doctor`, `npm run setup:local` (só se o `.env.local` ainda não existir) e mostra as orientações; não roda `db reset` nem sobrescreve nada. Rodar `npm run setup:local` de novo não sobrescreve o `.env.local` (use `-- --force` para recriar). O script nunca imprime chaves nem grava em arquivo versionado.
+
+O app **não sobe sem as variáveis obrigatórias** (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` e `SUPABASE_SECRET_KEY`): o build e a inicialização falham com mensagem em português. O e2e e o Lighthouse sem Supabase usam valores fictícios só do que faltar (`scripts/env-ficticia.mjs`).
 
 Alternativa em containers: `docker compose --profile dev up --build` (ou `--profile prod`). Detalhes em `docs/ambiente.md`.
 

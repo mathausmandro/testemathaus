@@ -49,6 +49,39 @@ describe("hook before_user_created", () => {
   });
 });
 
+describe("hook: só provedor azure fora do modo local (M1, correção pós-revisão)", () => {
+  const nova = readdirSync(migDir).find((f) => f.endsWith("_hook_somente_azure.sql"))!;
+  const sqlNova = readFileSync(join(migDir, nova), "utf8");
+  const ultimaDoHook = readdirSync(migDir)
+    .filter((f) => f.endsWith(".sql") && /function public.hook_before_user_created/.test(readFileSync(join(migDir, f), "utf8")))
+    .sort()
+    .pop();
+
+  it("a migration mais recente do hook é a que confere o provedor", () => {
+    expect(ultimaDoHook).toBe(nova);
+  });
+
+  it("flag com padrão false e recusa de provedor diferente de azure antes de tudo", () => {
+    expect(sqlNova).toMatch(/add column allow_non_azure_providers boolean not null default false/);
+    const corpo = sqlNova.slice(sqlNova.indexOf("begin"));
+    const provedor = corpo.indexOf("v_provider <> 'azure' and not coalesce(v_cfg.allow_non_azure_providers, false)");
+    expect(provedor).toBeGreaterThan(-1);
+    expect(provedor).toBeLessThan(corpo.indexOf("local_test_mode"));
+  });
+
+  it("privilégios do hook continuam restritos", () => {
+    expect(sqlNova).toContain("revoke execute on function public.hook_before_user_created(jsonb) from public, anon, authenticated, service_role;");
+    expect(sqlNova).toContain("grant execute on function public.hook_before_user_created(jsonb) to supabase_auth_admin;");
+  });
+
+  it("só o seed local liga a flag; o pgTAP cobre e-mail/senha recusado fora do modo local", () => {
+    const seed = readFileSync(join(root, "supabase", "seed.sql"), "utf8");
+    expect(seed).toContain("update app_private.auth_settings set allow_non_azure_providers = true;");
+    expect(pgtap).toContain("provedor email com domínio correto: recusa fora do modo local");
+    expect(pgtap).toContain("local_test_mode sozinho não libera e-mail/senha");
+  });
+});
+
 describe("scripts/set-allowed-email-domain.mjs", () => {
   it("normaliza o domínio", () => {
     expect(normalizarDominio("  @Empresa-Ficticia.TEST ")).toBe("empresa-ficticia.test");

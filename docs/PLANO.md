@@ -5,7 +5,7 @@ Cerca de 20 semanas, começando por um ensaio piloto.
 ## Status
 
 - [ ] Fase 0: Alinhamento
-- [ ] Fase 1: Base, login e ambientes (em andamento: 001 pronta em 27/10/2026, com Docker pendente pela TI; 003 e 004 escritas, prontas para validação com Docker/Supabase; 005 a 019 escritas, prontas para validação com Docker/Supabase (018: runbook docs/ambientes.md, guarda db-remoto e workflow de migrations de teste, sem contas criadas; 019: README, npm run doctor e roteiro de validação com Docker; 017: CSP com nonce, validação centralizada e test:security no verify; só o e2e logado depende do Supabase) (012 também aguarda o registro no Entra ID; 013, o domínio de e-mail); 002 pronta em 27/10/2026, CI real pendente do repositório remoto)
+- [ ] Fase 1: Base, login e ambientes (em andamento: 001 pronta em 27/10/2026, com Docker pendente pela TI; 003 e 004 escritas, prontas para validação com Docker/Supabase; 005 a 019 escritas, prontas para validação com Docker/Supabase (018: runbook docs/ambientes.md, guarda db-remoto e workflow de migrations de teste, sem contas criadas; 019: README, npm run doctor e roteiro de validação com Docker; 017: CSP com nonce, validação centralizada e test:security no verify; só o e2e logado depende do Supabase) (012 também aguarda o registro no Entra ID; 013, o domínio de e-mail); 002 pronta em 27/10/2026, CI real pendente do repositório remoto; 28/10/2026: correções pós-revisão final de QA e segurança (004 A1, M1, M2, B5, 019 A3, 012 A4) aguardando nova revisão)
 - [ ] Fase 2: Geração automática
 - [ ] Fase 3: Coleta de campo
 - [ ] Fase 4: Avisos e calendário

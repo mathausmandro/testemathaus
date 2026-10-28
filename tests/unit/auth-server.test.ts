@@ -1,6 +1,6 @@
 // @vitest-environment node
 // Helpers de servidor chamados direto (como faria uma Server Action ou um Route Handler).
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const m = vi.hoisted(() => ({
   obterSessao: vi.fn(),
@@ -20,7 +20,46 @@ import { exigirPerfil, exigirPerfilNaPagina, exigirSessao, exigirSessaoSemPerfil
 const sessao = (role: string | null) => ({ userId: "u1", email: "a@exemplo.test", perfil: role === undefined ? null : { role } });
 const destino = async (p: Promise<unknown>) => ((await p.catch((e) => e)) as { url: string }).url;
 
-afterEach(() => vi.clearAllMocks());
+beforeEach(() => vi.stubEnv("ALLOWED_EMAIL_DOMAIN", "exemplo.test"));
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.clearAllMocks();
+});
+
+describe("domínio do e-mail na sessão (M1)", () => {
+  const fora = { userId: "u2", email: "a@outro.test", perfil: { role: "coordination" } };
+
+  it("fora de ALLOWED_EMAIL_DOMAIN: tratado como sem sessão em actions e páginas", async () => {
+    m.obterSessao.mockResolvedValue(fora);
+    await expect(exigirSessao()).rejects.toMatchObject({ code: "unauthenticated" });
+    await expect(exigirPerfil(["coordination"])).rejects.toMatchObject({ code: "unauthenticated" });
+    expect(await destino(exigirPerfilNaPagina())).toBe("/login");
+    expect(await destino(exigirSessaoSemPerfilNaPagina())).toBe("/login");
+  });
+
+  it("subdomínio e sufixo parecidos são recusados", async () => {
+    for (const email of ["a@sub.exemplo.test", "a@exemplo.test.evil.test", "a@outro.test@exemplo.test"]) {
+      m.obterSessao.mockResolvedValue({ ...fora, email });
+      await expect(exigirSessao(), email).rejects.toMatchObject({ code: "unauthenticated" });
+    }
+  });
+
+  it("sem ALLOWED_EMAIL_DOMAIN e fora do modo local: ninguém entra", async () => {
+    vi.stubEnv("ALLOWED_EMAIL_DOMAIN", "");
+    m.obterSessao.mockResolvedValue(sessao("coordination"));
+    await expect(exigirSessao()).rejects.toMatchObject({ code: "unauthenticated" });
+  });
+
+  it("modo local: usuário fictício exemplo.test entra mesmo sem ALLOWED_EMAIL_DOMAIN", async () => {
+    vi.stubEnv("ALLOWED_EMAIL_DOMAIN", "");
+    vi.stubEnv("AUTH_LOCAL_PASSWORD_LOGIN", "true");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
+    vi.stubEnv("VERCEL_ENV", "");
+    vi.stubEnv("APP_ENV", "");
+    m.obterSessao.mockResolvedValue(sessao("field"));
+    await expect(exigirSessao()).resolves.toMatchObject({ userId: "u1" });
+  });
+});
 
 describe("Server Actions e Route Handlers", () => {
   it("sem sessão: unauthenticated", async () => {

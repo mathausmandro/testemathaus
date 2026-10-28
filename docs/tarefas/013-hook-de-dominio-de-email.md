@@ -68,3 +68,13 @@ pgTAP: matriz de e-mails aceitos e recusados, configuração ausente, claims sim
 - Caminho exato da claim `xms_edov` no evento do hook: o hook lê `user_metadata.custom_claims.xms_edov`, `user_metadata.xms_edov` e `identities[0].identity_data.custom_claims.xms_edov`; confirmar no primeiro login real e simplificar.
 - Recusa no fluxo OAuth chega ao callback do app como `error` e aparece como mensagem fixa (012).
 - Domínio único (coluna text). Se houver mais de um domínio (dúvida acima), trocar por lista em nova migration.
+
+### Correções pós-revisão final (28/10/2026, segurança M1)
+
+Não executado: requer Docker/Supabase local.
+
+- `supabase/migrations/20261028120000_hook_somente_azure.sql` (novo) cria `app_private.auth_settings.allow_non_azure_providers`, com padrão `false`. O hook passa a recusar, antes de qualquer outra regra, provedor diferente de `azure` (e-mail/senha, phone, anônimo, outro OAuth ou provedor ausente), a menos que essa flag esteja ligada. `local_test_mode` sozinho não libera.
+- `supabase/seed.sql`: só o seed local liga a flag (usuários fictícios e o e2e do hook). `db push` não aplica o seed, então teste e produção ficam só com azure.
+- pgTAP `supabase/tests/013_hook_dominio_email.test.sql`: o evento simulado passou a usar azure por padrão. Novos casos: e-mail/senha com o domínio correto recusado fora do modo local; phone, google, anônimo e provedor ausente recusados; `local_test_mode` sozinho não libera; com a flag, outro domínio continua recusado. Teste estático em `tests/unit/hook-dominio.test.ts`.
+- O runbook remoto (desligar o provedor Email, habilitar e testar o hook) e o B1 (`require_verified_email_claim`) como bloqueio de go-live estão em `docs/ambientes.md`, seção 1.1 e checklist.
+- Como testar (parceiro): `npx supabase db reset && npx supabase test db`.

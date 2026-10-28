@@ -1,13 +1,15 @@
 -- Tarefa 013: Before User Created Hook (domínio de e-mail).
 -- NÃO EXECUTADO: requer Docker/Supabase local. Rodar com: npx supabase test db
 -- Domínio FICTÍCIO (empresa-ficticia.test); tudo é desfeito no rollback.
+-- Correção pós-revisão (M1): o provedor padrão do evento simulado é azure; e-mail/senha só passa
+-- com allow_non_azure_providers (configuração explícita que só o seed local liga).
 
 begin;
 create extension if not exists pgtap with schema extensions;
 select * from no_plan();
 
 -- Evento simulado no formato do Supabase Auth (payload do before_user_created).
-create function pg_temp.ev(p_email text, p_provider text default 'email', p_user_metadata jsonb default '{}'::jsonb)
+create function pg_temp.ev(p_email text, p_provider text default 'azure', p_user_metadata jsonb default '{}'::jsonb)
 returns jsonb
 language sql
 as $$
@@ -69,12 +71,19 @@ select throws_ok($$ insert into app_private.auth_settings (id) values (false) $$
 -- ---------------------------------------------------------------------------
 -- Domínio não configurado: padrão seguro
 -- ---------------------------------------------------------------------------
-update app_private.auth_settings set allowed_email_domain = null, local_test_mode = false, require_verified_email_claim = false;
+update app_private.auth_settings
+   set allowed_email_domain = null, local_test_mode = false, require_verified_email_claim = false,
+       allow_non_azure_providers = false;
 
 select ok(pg_temp.recusa(pg_temp.ev('ana@empresa-ficticia.test')), 'sem domínio configurado: recusa');
 select ok(pg_temp.recusa(pg_temp.ev('coordenacao@exemplo.test')), 'sem domínio e sem modo local: recusa exemplo.test');
 
 update app_private.auth_settings set local_test_mode = true;
+select ok(pg_temp.recusa(pg_temp.ev('novo@exemplo.test', 'email')),
+  'modo local sem allow_non_azure_providers: e-mail/senha recusado');
+update app_private.auth_settings set allow_non_azure_providers = true;
+select ok(pg_temp.aceita(pg_temp.ev('novo@exemplo.test', 'email')), 'modo local: aceita usuário fictício exemplo.test por senha');
+update app_private.auth_settings set allow_non_azure_providers = false;
 select ok(pg_temp.aceita(pg_temp.ev('novo@exemplo.test')), 'modo local: aceita usuário fictício exemplo.test');
 select ok(pg_temp.recusa(pg_temp.ev('novo@sub.exemplo.test')), 'modo local: recusa subdomínio de exemplo.test');
 select ok(pg_temp.recusa(pg_temp.ev('ana@empresa-ficticia.test')), 'modo local sem domínio: recusa os demais');
@@ -117,6 +126,28 @@ select is(
 select ok(
   position('empresa-ficticia' in public.hook_before_user_created(pg_temp.ev('ana@outro-dominio.test'))::text) = 0,
   'mensagem não revela o domínio permitido');
+
+-- ---------------------------------------------------------------------------
+-- Provedor (M1): fora do modo local explícito, só azure
+-- ---------------------------------------------------------------------------
+select is((select allow_non_azure_providers from app_private.auth_settings), false,
+  'padrão da migration: só azure (allow_non_azure_providers = false)');
+select ok(pg_temp.recusa(pg_temp.ev('diretor@empresa-ficticia.test', 'email')),
+  'provedor email com domínio correto: recusa fora do modo local');
+select ok(pg_temp.recusa(pg_temp.ev('ana@empresa-ficticia.test', 'phone')), 'provedor phone: recusa');
+select ok(pg_temp.recusa(pg_temp.ev('ana@empresa-ficticia.test', 'google')), 'outro OAuth (google): recusa');
+select ok(pg_temp.recusa(pg_temp.ev('ana@empresa-ficticia.test', 'anonymous')), 'anônimo: recusa');
+select ok(pg_temp.recusa(pg_temp.ev('ana@empresa-ficticia.test', '')), 'provedor ausente: recusa');
+select ok(pg_temp.aceita(pg_temp.ev('ana@empresa-ficticia.test', 'AZURE')), 'azure (sem diferença de maiúsculas): aceita');
+update app_private.auth_settings set local_test_mode = true;
+select ok(pg_temp.recusa(pg_temp.ev('diretor@empresa-ficticia.test', 'email')),
+  'local_test_mode sozinho não libera e-mail/senha');
+update app_private.auth_settings set local_test_mode = false, allow_non_azure_providers = true;
+select ok(pg_temp.aceita(pg_temp.ev('ana@empresa-ficticia.test', 'email')),
+  'com a flag local: e-mail/senha do domínio aceito');
+select ok(pg_temp.recusa(pg_temp.ev('ana@outro-dominio.test', 'email')),
+  'com a flag local: e-mail/senha de outro domínio continua recusado');
+update app_private.auth_settings set allow_non_azure_providers = false;
 
 -- ---------------------------------------------------------------------------
 -- Claim xms_edov (provedor azure)

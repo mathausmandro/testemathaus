@@ -20,6 +20,9 @@ jobs:
   push-teste:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # B5 (docs/seguranca/003-019.md): só a main usa o environment "teste". No GitHub, o environment
+    # também deve ter "Deployment branches: main" (docs/ambientes.md, seção 5); este if é a 2ª barreira.
+    if: github.ref == 'refs/heads/main'
     environment: teste
     steps:
       # v7.0.1
